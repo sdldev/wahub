@@ -232,12 +232,12 @@ catch (error: any) {
 
 **Session Event Handling**:
 ```typescript
-whastapp.onConnected((session) => {
+whatsapp.onConnected((session) => {
     console.log(`session: '${session}' connected`);
     messageQueueService.resumeQueue(session);
 });
 
-whastapp.onDisconnected((session) => {
+whatsapp.onDisconnected((session) => {
     console.log(`session: '${session}' disconnected`);
     messageQueueService.pauseQueue(session);
 });
