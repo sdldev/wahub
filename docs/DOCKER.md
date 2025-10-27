@@ -11,7 +11,7 @@
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/Pramtoxz/wa-gateway.git
+git clone https://github.com/sdldev/wahub.git
 cd wa-gateway
 ```
 
@@ -306,6 +306,6 @@ docker-compose --profile nginx up -d
 
 ## 📞 Support
 
-- GitHub Issues: [wa-gateway/issues](https://github.com/Pramtoxz/wa-gateway/issues)
+- GitHub Issues: [wahub/issues](https://github.com/sdldev/wahub/issues)
 - Documentation: [README.md](README.md)
 - Docker Hub: (coming soon)
