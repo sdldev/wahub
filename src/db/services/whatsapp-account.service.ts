@@ -17,21 +17,25 @@ export class WhatsappAccountService {
     phoneNumber?: string
   ): Promise<WhatsappAccount> {
     try {
-      const result = await db
-        .insert(whatsappAccounts)
-        .values({
-          userId,
-          sessionId,
-          phoneNumber: phoneNumber || null,
-          status: 'disconnected',
-        })
-        .returning();
+      // For MySQL, insert and then select the created record
+      await db.insert(whatsappAccounts).values({
+        userId,
+        sessionId,
+        phoneNumber: phoneNumber || null,
+        status: 'disconnected',
+      });
 
-      if (!result || result.length === 0) {
+      // Fetch the created record by sessionId (which is unique)
+      const [account] = await db
+        .select()
+        .from(whatsappAccounts)
+        .where(eq(whatsappAccounts.sessionId, sessionId))
+        .limit(1);
+
+      if (!account) {
         throw new Error('Failed to create WhatsApp account');
       }
 
-      const account = result[0];
       dbLogger.info(`WhatsApp account created`, {
         accountId: account.id,
         sessionId,
@@ -50,9 +54,7 @@ export class WhatsappAccountService {
   /**
    * Find account by session ID
    */
-  static async findBySessionId(
-    sessionId: string
-  ): Promise<WhatsappAccount | null> {
+  static async findBySessionId(sessionId: string): Promise<WhatsappAccount | null> {
     try {
       const [account] = await db
         .select()
@@ -72,9 +74,7 @@ export class WhatsappAccountService {
   /**
    * Find account by phone number
    */
-  static async findByPhoneNumber(
-    phoneNumber: string
-  ): Promise<WhatsappAccount | null> {
+  static async findByPhoneNumber(phoneNumber: string): Promise<WhatsappAccount | null> {
     try {
       const [account] = await db
         .select()
@@ -96,10 +96,7 @@ export class WhatsappAccountService {
    */
   static async getAccountsByUser(userId: number): Promise<WhatsappAccount[]> {
     try {
-      return await db
-        .select()
-        .from(whatsappAccounts)
-        .where(eq(whatsappAccounts.userId, userId));
+      return await db.select().from(whatsappAccounts).where(eq(whatsappAccounts.userId, userId));
     } catch (error: any) {
       dbLogger.error('Failed to get accounts by user', {
         userId,
@@ -117,20 +114,26 @@ export class WhatsappAccountService {
     status: 'connected' | 'disconnected' | 'connecting' | 'error'
   ): Promise<WhatsappAccount> {
     try {
-      const result = await db
+      // MySQL doesn't support RETURNING clause, so we update then select
+      await db
         .update(whatsappAccounts)
         .set({
           status,
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date(),
         })
-        .where(eq(whatsappAccounts.sessionId, sessionId))
-        .returning();
+        .where(eq(whatsappAccounts.sessionId, sessionId));
 
-      if (!result || result.length === 0) {
+      // Fetch the updated record
+      const [account] = await db
+        .select()
+        .from(whatsappAccounts)
+        .where(eq(whatsappAccounts.sessionId, sessionId))
+        .limit(1);
+
+      if (!account) {
         throw new Error('Account not found');
       }
 
-      const account = result[0];
       dbLogger.info(`Account status updated`, { sessionId, status });
       return account;
     } catch (error: any) {
@@ -146,25 +149,28 @@ export class WhatsappAccountService {
   /**
    * Update phone number (when WhatsApp connection is established)
    */
-  static async updatePhoneNumber(
-    sessionId: string,
-    phoneNumber: string
-  ): Promise<WhatsappAccount> {
+  static async updatePhoneNumber(sessionId: string, phoneNumber: string): Promise<WhatsappAccount> {
     try {
-      const result = await db
+      // MySQL doesn't support RETURNING clause, so we update then select
+      await db
         .update(whatsappAccounts)
         .set({
           phoneNumber,
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date(),
         })
-        .where(eq(whatsappAccounts.sessionId, sessionId))
-        .returning();
+        .where(eq(whatsappAccounts.sessionId, sessionId));
 
-      if (!result || result.length === 0) {
+      // Fetch the updated record
+      const [account] = await db
+        .select()
+        .from(whatsappAccounts)
+        .where(eq(whatsappAccounts.sessionId, sessionId))
+        .limit(1);
+
+      if (!account) {
         throw new Error('Account not found');
       }
 
-      const account = result[0];
       dbLogger.info(`Phone number updated`, { sessionId, phoneNumber });
       return account;
     } catch (error: any) {
@@ -182,9 +188,7 @@ export class WhatsappAccountService {
    */
   static async deleteAccount(sessionId: string): Promise<void> {
     try {
-      await db
-        .delete(whatsappAccounts)
-        .where(eq(whatsappAccounts.sessionId, sessionId));
+      await db.delete(whatsappAccounts).where(eq(whatsappAccounts.sessionId, sessionId));
       dbLogger.info(`Account deleted`, { sessionId });
     } catch (error: any) {
       dbLogger.error('Failed to delete account', {
