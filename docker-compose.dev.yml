@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Development version dengan hot reload
+  wa-gateway-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: wa-gateway-dev
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+      - KEY=development-key
+      - MESSAGE_DELAY_MIN=1000
+      - MESSAGE_DELAY_MAX=3000
+      - MAX_MESSAGES_PER_MINUTE=60
+      - DATABASE_URL=file:./data/app-dev.db
+    volumes:
+      # Source code untuk hot reload
+      - .:/app
+      - /app/node_modules
+      # Persistent data
+      - ./wa_credentials:/app/wa_credentials
+      - ./media:/app/media
+      - dev_database:/app/data
+      - dev_logs:/app/logs
+    networks:
+      - wa-gateway-dev-network
+    command: npm run dev
+
+volumes:
+  dev_database:
+  dev_logs:
+
+networks:
+  wa-gateway-dev-network:
+    driver: bridge
