@@ -10,9 +10,9 @@
     "lint": "eslint src/**/*.ts",
     "lint:check": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "format": "prettier --check src/**/*.{ts}",
-    "format:check": "prettier --check src/**/*.{ts}",
-    "format:fix": "prettier --write src/**/*.{ts,js,json}",
+    "format": "prettier --check src/**/*.ts *.json --ignore-path .prettierignore",
+    "format:check": "prettier --check src/**/*.ts *.json --ignore-path .prettierignore",
+    "format:fix": "prettier --write src/**/*.ts *.json --ignore-path .prettierignore",
     "type-check": "bun run build"
   },
   "author": {
