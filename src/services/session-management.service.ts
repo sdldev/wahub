@@ -164,6 +164,19 @@ export class SessionManagementService {
    */
   static async onSessionConnected(sessionId: string, connectionInfo?: any): Promise<void> {
     try {
+      // Check if account exists, if not we need to handle gracefully
+      let account = await WhatsappAccountService.findBySessionId(sessionId);
+
+      if (!account) {
+        // Account doesn't exist yet - this can happen if session was started
+        // directly through WhatsApp library without using our API
+        // We'll log a warning but not fail
+        logger.warn('Session connected but no account record exists', {
+          sessionId,
+        });
+        return;
+      }
+
       // Update status to connected
       await WhatsappAccountService.updateStatus(sessionId, 'connected');
 
@@ -204,7 +217,7 @@ export class SessionManagementService {
       logger.info('Session connected successfully', { sessionId });
     } catch (error) {
       logger.error('Error handling session connection', { sessionId, error });
-      throw error;
+      // Don't throw - we don't want to crash the application
     }
   }
 
@@ -213,6 +226,17 @@ export class SessionManagementService {
    */
   static async onSessionDisconnected(sessionId: string): Promise<void> {
     try {
+      // Check if account exists
+      const account = await WhatsappAccountService.findBySessionId(sessionId);
+
+      if (!account) {
+        // Account doesn't exist - log warning but don't fail
+        logger.warn('Session disconnected but no account record exists', {
+          sessionId,
+        });
+        return;
+      }
+
       await WhatsappAccountService.updateStatus(sessionId, 'disconnected');
       logger.info('Session disconnected', { sessionId });
     } catch (error) {
@@ -220,6 +244,7 @@ export class SessionManagementService {
         sessionId,
         error,
       });
+      // Don't throw - we don't want to crash the application
     }
   }
 
@@ -228,16 +253,23 @@ export class SessionManagementService {
    */
   static async onSessionConnecting(sessionId: string): Promise<void> {
     try {
-      // Check if account exists, if not create it
+      // Check if account exists
       const account = await WhatsappAccountService.findBySessionId(sessionId);
 
-      if (account) {
-        await WhatsappAccountService.updateStatus(sessionId, 'connecting');
+      if (!account) {
+        // Account doesn't exist - log info, this is expected for sessions
+        // started outside our API
+        logger.info('Session connecting but no account record exists yet', {
+          sessionId,
+        });
+        return;
       }
 
+      await WhatsappAccountService.updateStatus(sessionId, 'connecting');
       logger.info('Session connecting', { sessionId });
     } catch (error) {
       logger.error('Error handling session connecting', { sessionId, error });
+      // Don't throw - we don't want to crash the application
     }
   }
 
