@@ -35,7 +35,7 @@ Sebuah gateway WhatsApp headless yang powerful, ringan, dan mudah di-deploy meng
 - ✅ **Retry Mechanism** - Retry otomatis untuk pesan gagal
 - ✅ **Queue Monitoring** - Status tracking dan monitoring
 
-### Phase 2: Foundation & Security ✅ **NEW**
+### Phase 2: Foundation & Security ✅ **COMPLETED**
 - ✅ **Multi-User Support** - User management dengan role-based access
 - ✅ **JWT Authentication** - Secure token-based authentication
 - ✅ **MySQL Database** - Production-ready database untuk 1,000,000+ pesan/hari
@@ -46,7 +46,16 @@ Sebuah gateway WhatsApp headless yang powerful, ringan, dan mudah di-deploy meng
 - ✅ **Data Encryption** - Enkripsi untuk data sensitif
 - ✅ **API Key per User** - Setiap user memiliki API key sendiri
 
-> 📖 **Dokumentasi Lengkap Phase 2**: [PHASE2-IMPLEMENTATION.md](PHASE2-IMPLEMENTATION.md)
+### Phase 3: Session Management ✅ **NEW**
+- ✅ **Session Deduplication** - Prevent multiple sessions untuk nomor yang sama
+- ✅ **Auto Phone Detection** - Deteksi otomatis nomor dari WhatsApp connection
+- ✅ **Session Monitoring** - Real-time status tracking dan health monitoring
+- ✅ **Session Cleanup** - Auto cleanup untuk inactive sessions
+- ✅ **Phone Validation** - Validasi dan normalisasi nomor telepon
+- ✅ **Enhanced API** - 4 endpoint baru untuk session management
+
+> 📖 **Dokumentasi Phase 2**: [PHASE2-IMPLEMENTATION.md](PHASE2-IMPLEMENTATION.md)
+> 📖 **Dokumentasi Phase 3**: [PHASE3-IMPLEMENTATION.md](PHASE3-IMPLEMENTATION.md) | [Quick Summary](PHASE3-SUMMARY.md)
 > 🔄 **MySQL Setup Guide**: [MYSQL-MIGRATION.md](MYSQL-MIGRATION.md) *(MySQL is required)*
 > 📦 **Database Migrations**: [drizzle/README.md](drizzle/README.md)
 
@@ -315,6 +324,66 @@ POST /session/logout
 Headers: x-api-key: your-api-key
 Body: {
   "sessionId": "mysession"
+}
+```
+
+#### Check Phone Number Availability (Phase 3 ✅)
+```bash
+POST /session/check-phone
+Headers: 
+  x-api-key: your-api-key
+  Content-Type: application/json
+Body: {
+  "phoneNumber": "6281234567890"
+}
+Response: {
+  "hasActiveSession": false
+}
+```
+
+#### Get Session Status (Phase 3 ✅)
+```bash
+GET /session/status?session=mysession
+Headers: x-api-key: your-api-key
+Response: {
+  "data": {
+    "sessionId": "mysession",
+    "phoneNumber": "6281234567890",
+    "status": "connected",
+    "isConnected": true,
+    "lastUpdated": "2025-10-27T19:00:00.000Z",
+    "createdAt": "2025-10-27T18:00:00.000Z"
+  }
+}
+```
+
+#### List All Sessions (Phase 3 ✅)
+```bash
+GET /session/list
+Headers: x-api-key: your-api-key
+Response: {
+  "data": [
+    {
+      "sessionId": "session1",
+      "phoneNumber": "6281234567890",
+      "status": "connected",
+      "userId": 1,
+      "createdAt": "2025-10-27T18:00:00.000Z",
+      "updatedAt": "2025-10-27T19:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### Cleanup Inactive Sessions (Phase 3 ✅)
+```bash
+POST /session/cleanup?hours=24
+Headers: x-api-key: your-api-key
+Response: {
+  "data": {
+    "message": "Cleaned up 2 inactive sessions",
+    "cleanedCount": 2
+  }
 }
 ```
 
