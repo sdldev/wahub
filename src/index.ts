@@ -21,6 +21,7 @@ import { createUserController } from './controllers/user';
 import { createJwtMiddleware } from './middlewares/jwt.middleware';
 import { initializeDatabase } from './db';
 import { logger as winstonLogger } from './utils/logger';
+import { SessionManagementService } from './services/session-management.service';
 
 // Initialize database
 try {
@@ -111,11 +112,30 @@ serve(
 whastapp.onConnected((session) => {
   console.log(`session: '${session}' connected`);
   messageQueueService.resumeQueue(session);
+
+  // Update session status in database with phone number detection
+  SessionManagementService.onSessionConnected(session).catch((error) => {
+    winstonLogger.error('Failed to handle session connection', { session, error });
+  });
 });
 
 whastapp.onDisconnected((session) => {
   console.log(`session: '${session}' disconnected`);
   messageQueueService.pauseQueue(session);
+
+  // Update session status in database
+  SessionManagementService.onSessionDisconnected(session).catch((error) => {
+    winstonLogger.error('Failed to handle session disconnection', { session, error });
+  });
+});
+
+whastapp.onConnecting((session) => {
+  console.log(`session: '${session}' connecting`);
+
+  // Update session status in database
+  SessionManagementService.onSessionConnecting(session).catch((error) => {
+    winstonLogger.error('Failed to handle session connecting', { session, error });
+  });
 });
 
 // Implement Webhook
@@ -133,14 +153,29 @@ if (env.WEBHOOK_BASE_URL) {
   whastapp.onConnected((session) => {
     console.log(`session: '${session}' connected`);
     webhookSession({ session, status: 'connected' });
+
+    // Update session status in database with phone number detection
+    SessionManagementService.onSessionConnected(session).catch((error) => {
+      winstonLogger.error('Failed to handle session connection for webhook', { session, error });
+    });
   });
   whastapp.onConnecting((session) => {
     console.log(`session: '${session}' connecting`);
     webhookSession({ session, status: 'connecting' });
+
+    // Update session status in database
+    SessionManagementService.onSessionConnecting(session).catch((error) => {
+      winstonLogger.error('Failed to handle session connecting for webhook', { session, error });
+    });
   });
   whastapp.onDisconnected((session) => {
     console.log(`session: '${session}' disconnected`);
     webhookSession({ session, status: 'disconnected' });
+
+    // Update session status in database
+    SessionManagementService.onSessionDisconnected(session).catch((error) => {
+      winstonLogger.error('Failed to handle session disconnection for webhook', { session, error });
+    });
   });
 }
 // End Implement Webhook
