@@ -1,73 +1,134 @@
-# React + TypeScript + Vite
+# WhatsApp Gateway Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Modern, responsive dashboard for managing WhatsApp Gateway sessions and messages.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🔐 **Authentication** - Login and registration with JWT
+- 📱 **Session Management** - Manage multiple WhatsApp sessions
+- 💬 **Message Composer** - Send text, image, and document messages
+- 📊 **Dashboard Overview** - Real-time statistics and monitoring
+- 🎨 **Modern UI** - Built with Shadcn/UI and Tailwind CSS
+- 🚀 **Fast** - Powered by Vite and React 18
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **UI Library**: Shadcn/UI
+- **Styling**: Tailwind CSS v4
+- **Routing**: React Router DOM v6
+- **State Management**: Zustand (ready to use)
+- **Data Fetching**: TanStack Query (ready to use)
+- **Forms**: React Hook Form + Zod (ready to use)
+- **Icons**: Lucide React
+- **HTTP Client**: Axios
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js 18+ or Bun
+- Backend API running on `http://localhost:5001`
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Install dependencies:
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Configure environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your API URL
 ```
+
+3. Start development server:
+```bash
+npm run dev
+```
+
+The dashboard will be available at `http://localhost:5173`
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+The built files will be in the `dist/` directory.
+
+## Project Structure
+
+```
+dashboard/
+├── src/
+│   ├── components/
+│   │   ├── ui/              # Shadcn UI components
+│   │   └── layout/          # Layout components (Sidebar, TopNav)
+│   ├── pages/
+│   │   ├── auth/            # Authentication pages
+│   │   └── dashboard/       # Dashboard pages
+│   ├── services/            # API service layer
+│   ├── lib/                 # Utilities
+│   ├── App.tsx              # Main app with routing
+│   └── main.tsx             # Entry point
+├── public/                  # Static assets
+└── components.json          # Shadcn config
+```
+
+## Available Pages
+
+- `/login` - Login page
+- `/register` - Registration page
+- `/dashboard` - Main dashboard overview
+- `/dashboard/sessions` - Session management
+- `/dashboard/messages` - Message composer
+- `/dashboard/analytics` - Analytics (coming soon)
+- `/dashboard/users` - User management (coming soon)
+- `/dashboard/settings` - Settings (coming soon)
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | Backend API URL | `http://localhost:5001` |
+| `VITE_WS_URL` | WebSocket URL | `ws://localhost:5001` |
+
+## Development
+
+### Adding New UI Components
+
+```bash
+# Example: Add a new Shadcn component
+npx shadcn@latest add dialog
+```
+
+### Code Style
+
+The project uses ESLint and Prettier for code formatting. Run:
+
+```bash
+npm run lint        # Check for linting errors
+npm run format      # Format code
+```
+
+## API Integration
+
+The dashboard connects to the WhatsApp Gateway backend API. API services are located in `src/services/`:
+
+- `auth.service.ts` - Authentication
+- `session.service.ts` - Session management
+- `message.service.ts` - Message operations
+
+## Contributing
+
+1. Create a feature branch
+2. Make your changes
+3. Test thoroughly
+4. Submit a pull request
+
+## License
+
+ISC
