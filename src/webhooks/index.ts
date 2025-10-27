@@ -1,5 +1,5 @@
-import axios from "axios";
-import { env } from "../env";
+import axios from 'axios';
+import { env } from '../env';
 
 export type CreateWebhookProps = {
   baseUrl: string;
@@ -8,6 +8,6 @@ export type CreateWebhookProps = {
 export const webhookClient = axios.create({
   headers: {
     Authorization: `Bearer ${env.KEY}`,
-    Accept: "application/json",
+    Accept: 'application/json',
   },
 });

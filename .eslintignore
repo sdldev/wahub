@@ -1,0 +1,6 @@
+node_modules/
+dist/
+*.js
+*.d.ts
+wa_credentials/
+*.log

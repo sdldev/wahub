@@ -1,8 +1,8 @@
-import { NotFoundHandler } from "hono";
-import { HTTPException } from "hono/http-exception";
+import { NotFoundHandler } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 
-export const notFoundMiddleware: NotFoundHandler = (c) => {
+export const notFoundMiddleware: NotFoundHandler = () => {
   throw new HTTPException(404, {
-    message: "Route not found",
+    message: 'Route not found',
   });
 };

@@ -1,9 +1,19 @@
 {
   "name": "wahub",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts"
+    "dev": "NODE_NO_WARNINGS=1 bun --hot src/index.ts",
+    "start": "NODE_NO_WARNINGS=1 bun src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "test": "bun test",
+    "lint": "eslint src/**/*.ts",
+    "lint:check": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --check src/**/*.{ts}",
+    "format:check": "prettier --check src/**/*.{ts}",
+    "format:fix": "prettier --write src/**/*.{ts,js,json}",
+    "type-check": "bun run build"
   },
   "author": {
     "name": "santrimu",
@@ -19,14 +29,14 @@
     "debug": "~2.6.9",
     "dotenv": "^16.0.0",
     "ejs": "^3.1.8",
-    "express": "^4.18.2",
-    "hono": "^4.10.3",
     "express": "^4.21.2",
-    "hono": "^4.6.13",
+    "hono": "^4.10.3",
     "http-errors": "~1.6.3",
+    "jimp": "^1.6.0",
     "moment": "^2.29.4",
     "morgan": "~1.10.1",
     "qrcode": "^1.5.1",
+    "sharp": "^0.34.4",
     "tsx": "^4.19.2",
     "wa-multi-session": "^3.8.3",
     "zod": "^3.23.8"
@@ -38,6 +48,11 @@
   "devDependencies": {
     "@types/node": "^22.10.1",
     "@types/qrcode": "^1.5.5",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "eslint": "^9.15.0",
+    "@eslint/js": "^9.15.0",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "prettier": "^3.3.3"
   }
 }

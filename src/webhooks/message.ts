@@ -1,11 +1,11 @@
-import { MessageReceived } from "wa-multi-session";
-import { CreateWebhookProps, webhookClient } from ".";
+import { MessageReceived } from 'wa-multi-session';
+import { CreateWebhookProps, webhookClient } from '.';
 import {
   handleWebhookAudioMessage,
   handleWebhookDocumentMessage,
   handleWebhookImageMessage,
   handleWebhookVideoMessage,
-} from "./media";
+} from './media';
 
 type WebhookMessageBody = {
   session: string;
@@ -22,8 +22,7 @@ type WebhookMessageBody = {
 
 export const createWebhookMessage =
   (props: CreateWebhookProps) => async (message: MessageReceived) => {
-    if (message.key.fromMe || message.key.remoteJid?.includes("broadcast"))
-      return;
+    if (message.key.fromMe || message.key.remoteJid?.includes('broadcast')) return;
 
     const endpoint = `${props.baseUrl}/message`;
 

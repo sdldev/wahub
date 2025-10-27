@@ -396,6 +396,15 @@ server {
 
 ### ❌ Common Issues
 
+#### WebSocket Warnings with Bun
+Jika menggunakan Bun sebagai runtime, Anda mungkin melihat warning seperti:
+```
+[bun] Warning: ws.WebSocket 'upgrade' event is not implemented in bun
+[bun] Warning: ws.WebSocket 'unexpected-response' event is not implemented in bun
+```
+
+**Solusi**: Warning ini tidak berbahaya dan tidak mempengaruhi fungsionalitas aplikasi. Mereka sudah di-suppress secara otomatis saat menjalankan `bun run dev` atau `bun run start`.
+
 #### QR Code Tidak Muncul
 ```bash
 # Check apakah session sudah dibuat
