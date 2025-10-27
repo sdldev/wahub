@@ -64,11 +64,13 @@ cd wa_gateway
 #### 2. Install Dependencies
 ```bash
 npm install
+# or with Bun (recommended)
+bun install
 ```
 
-#### 3. Install PM2 (Optional - untuk production)
+#### 3. Run Tests (Optional)
 ```bash
-npm install -g pm2
+bun test
 ```
 
 ## ⚙️ Konfigurasi
@@ -130,15 +132,27 @@ MAX_RETRY_ATTEMPTS=3             # Jumlah retry jika gagal
 
 #### Development Mode
 ```bash
-npm run dev
+bun run dev
 ```
 
 #### Production Mode
 ```bash
-npm run start
+bun run start
 
 # Atau menggunakan PM2
 pm2 start ecosystem.config.js
+```
+
+### 🧪 Testing
+```bash
+# Run all tests
+bun test
+
+# Run tests in watch mode
+bun test --watch
+
+# Run specific test file
+bun test src/app.test.ts
 ```
 
 Server akan berjalan di: `http://localhost:5001`

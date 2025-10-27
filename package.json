@@ -43,7 +43,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Pramtoxz/wa-gateway.git"
+    "url": "git@github.com:sdldev/wahub.git"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",
