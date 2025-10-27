@@ -36,6 +36,16 @@ export const env = z
       .string()
       .default('3')
       .transform((e) => Number(e)),
+
+    // JWT & Security Configuration
+    JWT_SECRET: z.string().optional(),
+    JWT_EXPIRES_IN: z.string().default('7d'),
+    ENCRYPTION_KEY: z.string().optional(),
+
+    // Logging Configuration
+    LOG_LEVEL: z
+      .enum(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'])
+      .default('info'),
   })
   .refine(
     (data) => {

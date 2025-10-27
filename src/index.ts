@@ -16,6 +16,19 @@ import { createProfileController } from './controllers/profile';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { createKeyMiddleware } from './middlewares/key.middleware';
 import { messageQueueService } from './services/message-queue.service';
+import { createAuthController } from './controllers/auth';
+import { createJwtMiddleware } from './middlewares/jwt.middleware';
+import { initializeDatabase } from './db';
+import { logger as winstonLogger } from './utils/logger';
+
+// Initialize database
+try {
+  initializeDatabase();
+  winstonLogger.info('Database initialized successfully');
+} catch (error) {
+  winstonLogger.error('Failed to initialize database', { error });
+  process.exit(1);
+}
 
 const app = new Hono();
 
@@ -45,6 +58,11 @@ app.use(
 app.use('/session/*', createKeyMiddleware());
 app.use('/message/*', createKeyMiddleware());
 app.use('/profile/*', createKeyMiddleware());
+
+/**
+ * Authentication routes (public)
+ */
+app.route('/auth', createAuthController());
 
 /**
  * session routes

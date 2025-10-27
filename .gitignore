@@ -3,3 +3,13 @@ wa_credentials/
 .env
 media/*
 !media/.gitkeep
+
+# Database files
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Log files
+logs/
+*.log
