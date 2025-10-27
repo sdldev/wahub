@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { navigateTo } from '@/lib/navigation';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -37,7 +38,7 @@ api.interceptors.response.use(
       // Clear auth data and redirect to login
       localStorage.removeItem('token');
       localStorage.removeItem('apiKey');
-      window.location.href = '/login';
+      navigateTo('/login');
     }
     return Promise.reject(error);
   }

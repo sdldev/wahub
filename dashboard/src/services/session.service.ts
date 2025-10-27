@@ -66,7 +66,7 @@ export const sessionService = {
 
   // Cleanup inactive sessions
   cleanupSessions: async (hours: number = 24): Promise<{ message: string; cleanedCount: number }> => {
-    const response = await api.post(`/session/cleanup?hours=${hours}`);
+    const response = await api.post('/session/cleanup', { hours });
     return response.data.data;
   },
 };

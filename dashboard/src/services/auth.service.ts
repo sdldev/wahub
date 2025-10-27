@@ -1,4 +1,5 @@
 import api from './api';
+import { navigateTo } from '@/lib/navigation';
 
 export interface LoginRequest {
   email: string;
@@ -35,7 +36,7 @@ export const authService = {
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('apiKey');
-    window.location.href = '/login';
+    navigateTo('/login');
   },
 
   getCurrentUser: async () => {
