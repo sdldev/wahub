@@ -63,9 +63,7 @@ export function createJwtMiddleware() {
  * Role-based Authorization Middleware
  * Checks if user has required role
  */
-export function createRoleMiddleware(
-  allowedRoles: Array<'admin' | 'user' | 'readonly'>
-) {
+export function createRoleMiddleware(allowedRoles: Array<'admin' | 'user' | 'readonly'>) {
   return async (c: Context, next: Next) => {
     const user = c.get('user');
     if (!user) {

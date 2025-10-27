@@ -13,10 +13,7 @@ export class PasswordService {
   /**
    * Compare a plain text password with a hashed password
    */
-  static async compare(
-    password: string,
-    hashedPassword: string
-  ): Promise<boolean> {
+  static async compare(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
   }
 

@@ -30,69 +30,61 @@ const loginSchema = z.object({
  * POST /auth/register
  * Register a new user
  */
-authController.post(
-  '/register',
-  zValidator('json', registerSchema),
-  async (c) => {
-    try {
-      const { email, password, role } = c.req.valid('json');
+authController.post('/register', zValidator('json', registerSchema), async (c) => {
+  try {
+    const { email, password, role } = c.req.valid('json');
 
-      // Check if user already exists
-      const existingUser = await UserService.findByEmail(email);
-      if (existingUser) {
-        return c.json(
-          {
-            success: false,
-            error: 'User already exists',
-          },
-          400
-        );
-      }
-
-      // Create user
-      const user = await UserService.createUser(
-        email,
-        password,
-        role || 'user'
-      );
-
-      // Generate JWT token
-      const token = JwtService.sign({
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-      });
-
-      authLogger.info('User registered successfully', {
-        userId: user.id,
-        email: user.email,
-      });
-
-      return c.json({
-        success: true,
-        data: {
-          user: {
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            apiKey: user.apiKey,
-            createdAt: user.createdAt,
-          },
-          token,
-        },
-      });
-    } catch (error: any) {
-      authLogger.error('Registration failed', { error: error.message });
+    // Check if user already exists
+    const existingUser = await UserService.findByEmail(email);
+    if (existingUser) {
       return c.json(
         {
           success: false,
-          error: error.message || 'Failed to register user',
+          error: 'User already exists',
         },
-        500
+        400
       );
     }
+
+    // Create user
+    const user = await UserService.createUser(email, password, role || 'user');
+
+    // Generate JWT token
+    const token = JwtService.sign({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    authLogger.info('User registered successfully', {
+      userId: user.id,
+      email: user.email,
+    });
+
+    return c.json({
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          apiKey: user.apiKey,
+          createdAt: user.createdAt,
+        },
+        token,
+      },
+    });
+  } catch (error: any) {
+    authLogger.error('Registration failed', { error: error.message });
+    return c.json(
+      {
+        success: false,
+        error: error.message || 'Failed to register user',
+      },
+      500
+    );
   }
-);
+});
 
 /**
  * POST /auth/login

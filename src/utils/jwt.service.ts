@@ -2,8 +2,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
 // Use environment variable or generate a random secret (for dev)
-const JWT_SECRET =
-  process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 export interface JwtPayload {
