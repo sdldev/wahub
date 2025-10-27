@@ -4,19 +4,20 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
+# Copy package files dari backend
+COPY backend/package*.json ./
+COPY backend/pnpm-lock.yaml* ./
+COPY backend/bun.lockb* ./
 
 # Install pnpm
 RUN npm install -g pnpm
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile || npm install
 
-# Copy source code dan build
-COPY . .
-RUN pnpm run build
+# Copy source code backend dan build
+COPY backend/ .
+RUN pnpm run build || npm run build
 
 # Production stage
 FROM node:18-alpine AS production
@@ -26,31 +27,30 @@ RUN apk add --no-cache dumb-init
 
 # Create app user
 RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+RUN adduser -S nodejs -u 1001
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
+COPY backend/package*.json ./
 
 # Install pnpm
 RUN npm install -g pnpm
 
 # Install only production dependencies
-RUN pnpm install --frozen-lockfile --production
+RUN pnpm install --frozen-lockfile --production || npm install --production
 
 # Copy built application dari builder stage
-COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 
 # Create directories untuk persistent data
 RUN mkdir -p /app/wa_credentials /app/media /app/logs
-RUN chown -R nextjs:nodejs /app/wa_credentials /app/media /app/logs
+RUN chown -R nodejs:nodejs /app/wa_credentials /app/media /app/logs
 
 # Switch to non-root user
-USER nextjs
+USER nodejs
 
 # Expose port
 EXPOSE 5001
