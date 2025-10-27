@@ -1,42 +1,25 @@
-# MySQL Migration Guide
+# MySQL Database Implementation
 
 ## Overview
 
-Phase 2 now supports both SQLite and MySQL databases. MySQL is recommended for production environments with high message volumes (1000+ messages per day).
+Phase 2 uses MySQL database exclusively. MySQL provides excellent performance, scalability, and is the industry standard for production web applications.
 
 ## Why MySQL?
 
-### Advantages for High-Volume Scenarios
+### Advantages
 
-1. **Better Concurrency**: MySQL handles multiple concurrent connections better than SQLite
+1. **Better Concurrency**: MySQL handles multiple concurrent connections excellently
 2. **Scalability**: Proven performance with millions of records
 3. **Replication**: Built-in master-slave replication for high availability
 4. **Remote Access**: Can be accessed from multiple application servers
 5. **Production Ready**: Industry standard for web applications
-
-### Performance Comparison
-
-| Feature | SQLite | MySQL |
-|---------|--------|-------|
-| Concurrent Writes | Limited (WAL helps) | Excellent |
-| Max Database Size | 281 TB (theoretical) | Effectively unlimited |
-| Network Access | No | Yes |
-| Replication | No | Yes |
-| Recommended Max Messages/Day | < 10,000 | 1,000,000+ |
+6. **High Performance**: Excellent for high message volumes (1,000,000+ messages/day)
 
 ## Configuration
 
-### SQLite (Default)
+# MySQL Database Setup
 
-No additional configuration needed. Database file is created automatically in `data/wahub.db`.
-
-```env
-DB_TYPE=sqlite
-```
-
-### MySQL (Recommended for Production)
-
-1. **Install MySQL Server** (if not already installed)
+## Setup MySQL
 
 ```bash
 # Ubuntu/Debian
@@ -50,7 +33,7 @@ sudo yum install mysql-server
 brew install mysql
 ```
 
-2. **Create Database and User**
+### 2. Create Database and User
 
 ```sql
 -- Connect to MySQL as root
@@ -70,7 +53,7 @@ FLUSH PRIVILEGES;
 EXIT;
 ```
 
-3. **Update Environment Variables**
+### 3. Update Environment Variables
 
 Edit your `.env` file:
 
@@ -86,53 +69,81 @@ DB_PASSWORD=secure_password_here
 DB_NAME=wahub
 ```
 
-4. **Restart Application**
+### 4. Run Migrations and Seed Data
+
+```bash
+# Generate and apply migrations
+npm run db:push
+
+# Or use proper migrations for production
+npm run db:generate
+npm run db:migrate
+
+# Seed database with dummy data (development only)
+npm run db:seed
+```
+
+### 5. Start Application
 
 ```bash
 npm start
 ```
 
-The application will automatically create all necessary tables and indexes on first run.
+The application will automatically connect to MySQL and create all necessary tables on first run.
 
-## Migration from SQLite to MySQL
+## Database Management
 
-If you already have data in SQLite and want to migrate to MySQL:
+### Using Drizzle Kit
 
-### Option 1: Fresh Start (Recommended)
+Drizzle Kit provides tools for managing your database schema:
 
-1. Backup your current SQLite data (if needed)
+```bash
+# Generate migration files from schema
+npm run db:generate
+
+# Apply migrations to database
+npm run db:migrate
+
+# Push schema changes directly (development)
+npm run db:push
+
+# Open Drizzle Studio (visual database browser)
+npm run db:studio
+
+# Seed database with test data
+npm run db:seed
+```
+
+See `drizzle/README.md` for detailed migration documentation.
+
+## Dummy Data for Development
+
+The seed script (`npm run db:seed`) creates:
+
+- **4 test users** with different roles (admin, user, readonly)
+- **Multiple WhatsApp accounts** in various states
+- **Sample sessions** (active and inactive)
+- **Test messages** with different statuses
+- **Message queue** entries
+- **Rate limit** records
+
+### Test Login Credentials
+
+After seeding:
+- Admin: `admin@wahub.local` / `Admin123!`
+- User 1: `user1@wahub.local` / `User123!`
+- User 2: `user2@wahub.local` / `User123!`
+- ReadOnly: `readonly@wahub.local` / `Read123!`
+
+## Migration from Phase 1
+
+If you have data from Phase 1 (before MySQL), you'll need to:
+
+1. Backup any important session data from `wa_credentials/`
 2. Configure MySQL as shown above
-3. Change `DB_TYPE=mysql` in `.env`
-4. Restart the application
+3. Run migrations: `npm run db:migrate`
+4. Seed initial data: `npm run db:seed`
 5. Re-register users and reconnect WhatsApp sessions
-
-### Option 2: Data Migration (Advanced)
-
-1. **Export SQLite data**
-
-```bash
-# Install sqlite3 if not available
-sudo apt-get install sqlite3
-
-# Export to SQL
-sqlite3 data/wahub.db .dump > backup.sql
-```
-
-2. **Convert to MySQL format**
-
-```bash
-# Basic conversion (you may need to adjust)
-sed -i 's/AUTOINCREMENT/AUTO_INCREMENT/g' backup.sql
-sed -i 's/TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP/TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP/g' backup.sql
-```
-
-3. **Import to MySQL**
-
-```bash
-mysql -u wahub_user -p wahub < backup.sql
-```
-
-Note: Manual adjustment may be required for data types and constraints.
 
 ## Docker Setup with MySQL
 
@@ -335,6 +346,4 @@ SELECT * FROM mysql.slow_log;
 
 ## Conclusion
 
-MySQL provides better performance and scalability for high-volume WhatsApp gateway deployments. The transition is straightforward with the new configuration system, and both SQLite and MySQL are fully supported.
-
-For deployments expecting 1000+ messages per day, MySQL is strongly recommended.
+MySQL provides excellent performance and scalability for WhatsApp gateway deployments. The migration infrastructure with Drizzle ORM makes it easy to manage schema changes and maintain database consistency across environments.
