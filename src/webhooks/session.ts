@@ -1,6 +1,6 @@
-import { CreateWebhookProps, webhookClient } from ".";
+import { CreateWebhookProps, webhookClient } from '.';
 
-type SessionStatus = "connected" | "disconnected" | "connecting";
+type SessionStatus = 'connected' | 'disconnected' | 'connecting';
 
 type WebhookSessionBody = {
   session: string;

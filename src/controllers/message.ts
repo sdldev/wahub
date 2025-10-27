@@ -1,10 +1,10 @@
-import { Hono } from "hono";
-import { createKeyMiddleware } from "../middlewares/key.middleware";
-import { requestValidator } from "../middlewares/validation.middleware";
-import { z } from "zod";
-import * as whatsapp from "wa-multi-session";
-import { HTTPException } from "hono/http-exception";
-import { messageQueueService } from "../services/message-queue.service";
+import { Hono } from 'hono';
+import { createKeyMiddleware } from '../middlewares/key.middleware';
+import { requestValidator } from '../middlewares/validation.middleware';
+import { z } from 'zod';
+import * as whatsapp from 'wa-multi-session';
+import { HTTPException } from 'hono/http-exception';
+import { messageQueueService } from '../services/message-queue.service';
 
 export const createMessageController = () => {
   const app = new Hono();
@@ -17,15 +17,15 @@ export const createMessageController = () => {
   });
 
   app.post(
-    "/send-text",
+    '/send-text',
     createKeyMiddleware(),
-    requestValidator("json", sendMessageSchema),
+    requestValidator('json', sendMessageSchema),
     async (c) => {
-      const payload = c.req.valid("json");
+      const payload = c.req.valid('json');
       const isExist = whatsapp.getSession(payload.session);
       if (!isExist) {
         throw new HTTPException(400, {
-          message: "Session does not exist",
+          message: 'Session does not exist',
         });
       }
 
@@ -33,20 +33,20 @@ export const createMessageController = () => {
         sessionId: payload.session,
         to: payload.to,
         text: payload.text,
-        type: "text",
+        type: 'text',
         isGroup: payload.is_group,
       });
 
       if (!result.success) {
         throw new HTTPException(429, {
-          message: result.error || "Failed to enqueue message",
+          message: result.error || 'Failed to enqueue message',
         });
       }
 
       return c.json({
         success: true,
         messageId: result.messageId,
-        message: "Message queued successfully",
+        message: 'Message queued successfully',
       });
     }
   );
@@ -56,15 +56,15 @@ export const createMessageController = () => {
    * This endpoint is deprecated, use POST /send-text instead
    */
   app.get(
-    "/send-text",
+    '/send-text',
     createKeyMiddleware(),
-    requestValidator("query", sendMessageSchema),
+    requestValidator('query', sendMessageSchema),
     async (c) => {
-      const payload = c.req.valid("query");
+      const payload = c.req.valid('query');
       const isExist = whatsapp.getSession(payload.session);
       if (!isExist) {
         throw new HTTPException(400, {
-          message: "Session does not exist",
+          message: 'Session does not exist',
         });
       }
 
@@ -81,10 +81,10 @@ export const createMessageController = () => {
   );
 
   app.post(
-    "/send-image",
+    '/send-image',
     createKeyMiddleware(),
     requestValidator(
-      "json",
+      'json',
       sendMessageSchema.merge(
         z.object({
           image_url: z.string(),
@@ -92,11 +92,11 @@ export const createMessageController = () => {
       )
     ),
     async (c) => {
-      const payload = c.req.valid("json");
+      const payload = c.req.valid('json');
       const isExist = whatsapp.getSession(payload.session);
       if (!isExist) {
         throw new HTTPException(400, {
-          message: "Session does not exist",
+          message: 'Session does not exist',
         });
       }
 
@@ -104,29 +104,29 @@ export const createMessageController = () => {
         sessionId: payload.session,
         to: payload.to,
         text: payload.text,
-        type: "image",
+        type: 'image',
         media: payload.image_url,
         isGroup: payload.is_group,
       });
 
       if (!result.success) {
         throw new HTTPException(429, {
-          message: result.error || "Failed to enqueue message",
+          message: result.error || 'Failed to enqueue message',
         });
       }
 
       return c.json({
         success: true,
         messageId: result.messageId,
-        message: "Message queued successfully",
+        message: 'Message queued successfully',
       });
     }
   );
   app.post(
-    "/send-document",
+    '/send-document',
     createKeyMiddleware(),
     requestValidator(
-      "json",
+      'json',
       sendMessageSchema.merge(
         z.object({
           document_url: z.string(),
@@ -135,11 +135,11 @@ export const createMessageController = () => {
       )
     ),
     async (c) => {
-      const payload = c.req.valid("json");
+      const payload = c.req.valid('json');
       const isExist = whatsapp.getSession(payload.session);
       if (!isExist) {
         throw new HTTPException(400, {
-          message: "Session does not exist",
+          message: 'Session does not exist',
         });
       }
 
@@ -147,7 +147,7 @@ export const createMessageController = () => {
         sessionId: payload.session,
         to: payload.to,
         text: payload.text,
-        type: "document",
+        type: 'document',
         media: payload.document_url,
         filename: payload.document_name,
         isGroup: payload.is_group,
@@ -155,23 +155,23 @@ export const createMessageController = () => {
 
       if (!result.success) {
         throw new HTTPException(429, {
-          message: result.error || "Failed to enqueue message",
+          message: result.error || 'Failed to enqueue message',
         });
       }
 
       return c.json({
         success: true,
         messageId: result.messageId,
-        message: "Message queued successfully",
+        message: 'Message queued successfully',
       });
     }
   );
 
   app.post(
-    "/send-sticker",
+    '/send-sticker',
     createKeyMiddleware(),
     requestValidator(
-      "json",
+      'json',
       sendMessageSchema.merge(
         z.object({
           image_url: z.string(),
@@ -179,53 +179,53 @@ export const createMessageController = () => {
       )
     ),
     async (c) => {
-      const payload = c.req.valid("json");
+      const payload = c.req.valid('json');
       const isExist = whatsapp.getSession(payload.session);
       if (!isExist) {
         throw new HTTPException(400, {
-          message: "Session does not exist",
+          message: 'Session does not exist',
         });
       }
 
       const result = messageQueueService.enqueue({
         sessionId: payload.session,
         to: payload.to,
-        text: "",
-        type: "sticker",
+        text: '',
+        type: 'sticker',
         media: payload.image_url,
         isGroup: payload.is_group,
       });
 
       if (!result.success) {
         throw new HTTPException(429, {
-          message: result.error || "Failed to enqueue message",
+          message: result.error || 'Failed to enqueue message',
         });
       }
 
       return c.json({
         success: true,
         messageId: result.messageId,
-        message: "Message queued successfully",
+        message: 'Message queued successfully',
       });
     }
   );
 
   // Get queue status endpoint
   app.get(
-    "/queue-status",
+    '/queue-status',
     createKeyMiddleware(),
     requestValidator(
-      "query",
+      'query',
       z.object({
         session: z.string(),
       })
     ),
     async (c) => {
-      const { session } = c.req.valid("query");
+      const { session } = c.req.valid('query');
       const isExist = whatsapp.getSession(session);
       if (!isExist) {
         throw new HTTPException(400, {
-          message: "Session does not exist",
+          message: 'Session does not exist',
         });
       }
 

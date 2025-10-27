@@ -1,6 +1,6 @@
-import { MessageReceived } from "wa-multi-session";
+import { MessageReceived } from 'wa-multi-session';
 
-const baseMediaPath = "./media/";
+const baseMediaPath = './media/';
 
 export const handleWebhookImageMessage = async (message: MessageReceived) => {
   if (message.message?.imageMessage) {
@@ -24,9 +24,7 @@ export const handleWebhookVideoMessage = async (message: MessageReceived) => {
   return null;
 };
 
-export const handleWebhookDocumentMessage = async (
-  message: MessageReceived
-) => {
+export const handleWebhookDocumentMessage = async (message: MessageReceived) => {
   if (message.message?.documentMessage) {
     const baseMediaName = `${message.key.id}`;
 

@@ -3,3 +3,18 @@ wa_credentials/
 .env
 media/*
 !media/.gitkeep
+
+# Database files
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Drizzle migration files (generated)
+drizzle/*.sql
+drizzle/meta/
+!drizzle/README.md
+
+# Log files
+logs/
+*.log

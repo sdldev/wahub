@@ -1,10 +1,10 @@
 export class ApplicationError extends Error {
-  baseName = "ApplicationError";
+  baseName = 'ApplicationError';
   code = 500;
 
   constructor(message: string) {
     super(message);
-    this.name = "ApplicationError";
+    this.name = 'ApplicationError';
   }
 
   getResponseMessage = () => {
@@ -14,8 +14,6 @@ export class ApplicationError extends Error {
   };
 
   static isApplicationError = (error: any): error is ApplicationError => {
-    return (
-      error instanceof ApplicationError || error.baseName === "ApplicationError"
-    );
+    return error instanceof ApplicationError || error.baseName === 'ApplicationError';
   };
 }

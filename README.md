@@ -35,6 +35,30 @@ Sebuah gateway WhatsApp headless yang powerful, ringan, dan mudah di-deploy meng
 - ✅ **Retry Mechanism** - Retry otomatis untuk pesan gagal
 - ✅ **Queue Monitoring** - Status tracking dan monitoring
 
+### Phase 2: Foundation & Security ✅ **COMPLETED**
+- ✅ **Multi-User Support** - User management dengan role-based access
+- ✅ **JWT Authentication** - Secure token-based authentication
+- ✅ **MySQL Database** - Production-ready database untuk 1,000,000+ pesan/hari
+- ✅ **Migration System** - Drizzle ORM untuk database management
+- ✅ **Seed Data** - Dummy data untuk development dan testing
+- ✅ **Message History** - Complete message history tracking
+- ✅ **Structured Logging** - Winston logger dengan file rotation
+- ✅ **Data Encryption** - Enkripsi untuk data sensitif
+- ✅ **API Key per User** - Setiap user memiliki API key sendiri
+
+### Phase 3: Session Management ✅ **NEW**
+- ✅ **Session Deduplication** - Prevent multiple sessions untuk nomor yang sama
+- ✅ **Auto Phone Detection** - Deteksi otomatis nomor dari WhatsApp connection
+- ✅ **Session Monitoring** - Real-time status tracking dan health monitoring
+- ✅ **Session Cleanup** - Auto cleanup untuk inactive sessions
+- ✅ **Phone Validation** - Validasi dan normalisasi nomor telepon
+- ✅ **Enhanced API** - 4 endpoint baru untuk session management
+
+> 📖 **Dokumentasi Phase 2**: [PHASE2-IMPLEMENTATION.md](PHASE2-IMPLEMENTATION.md)
+> 📖 **Dokumentasi Phase 3**: [PHASE3-IMPLEMENTATION.md](PHASE3-IMPLEMENTATION.md) | [Quick Summary](PHASE3-SUMMARY.md)
+> 🔄 **MySQL Setup Guide**: [MYSQL-MIGRATION.md](MYSQL-MIGRATION.md) *(MySQL is required)*
+> 📦 **Database Migrations**: [drizzle/README.md](drizzle/README.md)
+
 ## 📦 Panduan Instalasi
 
 ### 🐳 Instalasi dengan Docker (Recommended)
@@ -64,11 +88,43 @@ cd wa_gateway
 #### 2. Install Dependencies
 ```bash
 npm install
+# or with Bun (recommended)
+bun install
 ```
 
-#### 3. Install PM2 (Optional - untuk production)
+#### 3. Setup MySQL Database
 ```bash
-npm install -g pm2
+# Connect to MySQL as root
+mysql -u root -p
+
+# Create database and user
+CREATE DATABASE wahub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'wahub_user'@'localhost' IDENTIFIED BY 'your_secure_password';
+GRANT ALL PRIVILEGES ON wahub.* TO 'wahub_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+> 📖 **Detailed MySQL Setup**: See [MYSQL-MIGRATION.md](MYSQL-MIGRATION.md)
+
+#### 4. Configure Environment
+```bash
+cp .env.example .env
+nano .env  # Edit with your MySQL credentials
+```
+
+#### 5. Run Migrations and Seed Data
+```bash
+# Apply database migrations
+npm run db:migrate
+
+# Seed with test data (development only)
+npm run db:seed
+```
+
+#### 6. Run Tests (Optional)
+```bash
+bun test
 ```
 
 ## ⚙️ Konfigurasi
@@ -85,6 +141,19 @@ Edit file `.env`:
 NODE_ENV=DEVELOPMENT
 PORT=5001
 KEY=your-secret-api-key
+
+# MySQL Database Configuration (Required)
+DB_TYPE=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=wahub_user
+DB_PASSWORD=your_secure_password
+DB_NAME=wahub
+
+# JWT & Security Configuration
+JWT_SECRET=your-jwt-secret-change-in-production
+JWT_EXPIRES_IN=7d
+ENCRYPTION_KEY=your-encryption-key-change-in-production
 
 # Webhook (Optional)
 WEBHOOK_BASE_URL=https://your-webhook-url.com
@@ -104,10 +173,19 @@ MAX_RETRY_ATTEMPTS=3             # Jumlah retry jika gagal
 | `NODE_ENV` | Environment mode | DEVELOPMENT | PRODUCTION untuk live |
 | `PORT` | Port server | 5001 | Sesuai kebutuhan |
 | `KEY` | API Key untuk autentikasi | - | String acak yang kuat |
+| `DB_TYPE` | Database type | mysql | mysql (required) |
+| `DB_HOST` | MySQL host | localhost | IP/hostname MySQL |
+| `DB_USER` | MySQL user | wahub_user | Database username |
+| `DB_PASSWORD` | MySQL password | - | Strong password |
+| `DB_NAME` | Database name | wahub | Database name |
+| `JWT_SECRET` | JWT secret key | - | 64-char random string |
+| `ENCRYPTION_KEY` | Encryption key | - | 64-char random string |
 | `MESSAGE_DELAY_MIN` | Delay minimum antar pesan | 3000ms | 3000-5000ms |
 | `MESSAGE_DELAY_MAX` | Delay maksimum antar pesan | 7000ms | 7000-10000ms |
 | `MAX_MESSAGES_PER_MINUTE` | Limit pesan per menit | 20 | 10-30 |
 | `MAX_MESSAGES_PER_HOUR` | Limit pesan per jam | 500 | 300-1000 |
+
+> 🔐 **Generate Secure Keys**: Use `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` to generate JWT_SECRET and ENCRYPTION_KEY
 
 ## 🏃 Menjalankan Server
 
@@ -130,15 +208,27 @@ MAX_RETRY_ATTEMPTS=3             # Jumlah retry jika gagal
 
 #### Development Mode
 ```bash
-npm run dev
+bun run dev
 ```
 
 #### Production Mode
 ```bash
-npm run start
+bun run start
 
 # Atau menggunakan PM2
 pm2 start ecosystem.config.js
+```
+
+### 🧪 Testing
+```bash
+# Run all tests
+bun test
+
+# Run tests in watch mode
+bun test --watch
+
+# Run specific test file
+bun test src/app.test.ts
 ```
 
 Server akan berjalan di: `http://localhost:5001`
@@ -234,6 +324,66 @@ POST /session/logout
 Headers: x-api-key: your-api-key
 Body: {
   "sessionId": "mysession"
+}
+```
+
+#### Check Phone Number Availability (Phase 3 ✅)
+```bash
+POST /session/check-phone
+Headers: 
+  x-api-key: your-api-key
+  Content-Type: application/json
+Body: {
+  "phoneNumber": "6281234567890"
+}
+Response: {
+  "hasActiveSession": false
+}
+```
+
+#### Get Session Status (Phase 3 ✅)
+```bash
+GET /session/status?session=mysession
+Headers: x-api-key: your-api-key
+Response: {
+  "data": {
+    "sessionId": "mysession",
+    "phoneNumber": "6281234567890",
+    "status": "connected",
+    "isConnected": true,
+    "lastUpdated": "2025-10-27T19:00:00.000Z",
+    "createdAt": "2025-10-27T18:00:00.000Z"
+  }
+}
+```
+
+#### List All Sessions (Phase 3 ✅)
+```bash
+GET /session/list
+Headers: x-api-key: your-api-key
+Response: {
+  "data": [
+    {
+      "sessionId": "session1",
+      "phoneNumber": "6281234567890",
+      "status": "connected",
+      "userId": 1,
+      "createdAt": "2025-10-27T18:00:00.000Z",
+      "updatedAt": "2025-10-27T19:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### Cleanup Inactive Sessions (Phase 3 ✅)
+```bash
+POST /session/cleanup?hours=24
+Headers: x-api-key: your-api-key
+Response: {
+  "data": {
+    "message": "Cleaned up 2 inactive sessions",
+    "cleanedCount": 2
+  }
 }
 ```
 
@@ -395,6 +545,15 @@ server {
 ## 🐛 Troubleshooting
 
 ### ❌ Common Issues
+
+#### WebSocket Warnings with Bun
+Jika menggunakan Bun sebagai runtime, Anda mungkin melihat warning seperti:
+```
+[bun] Warning: ws.WebSocket 'upgrade' event is not implemented in bun
+[bun] Warning: ws.WebSocket 'unexpected-response' event is not implemented in bun
+```
+
+**Solusi**: Warning ini tidak berbahaya dan tidak mempengaruhi fungsionalitas aplikasi. Mereka sudah di-suppress secara otomatis saat menjalankan `bun run dev` atau `bun run start`.
 
 #### QR Code Tidak Muncul
 ```bash
