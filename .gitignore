@@ -10,6 +10,11 @@ data/
 *.db-shm
 *.db-wal
 
+# Drizzle migration files (generated)
+drizzle/*.sql
+drizzle/meta/
+!drizzle/README.md
+
 # Log files
 logs/
 *.log

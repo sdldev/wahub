@@ -153,8 +153,8 @@ export class MessageHistoryService {
         .where(
           and(
             eq(messages.sessionId, sessionId),
-            gte(messages.createdAt, startDate),
-            lte(messages.createdAt, endDate)
+            gte(messages.createdAt, new Date(startDate)),
+            lte(messages.createdAt, new Date(endDate))
           )
         )
         .orderBy(desc(messages.createdAt));
@@ -212,8 +212,8 @@ export class MessageHistoryService {
           .where(
             and(
               eq(messages.sessionId, sessionId),
-              gte(messages.createdAt, startDate),
-              lte(messages.createdAt, endDate)
+              gte(messages.createdAt, new Date(startDate)),
+              lte(messages.createdAt, new Date(endDate))
             )
           );
       } else {
@@ -246,11 +246,10 @@ export class MessageHistoryService {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysOld);
-      const cutoffDateStr = cutoffDate.toISOString();
 
       const result = await db
         .delete(messages)
-        .where(lte(messages.createdAt, cutoffDateStr))
+        .where(lte(messages.createdAt, cutoffDate))
         .returning();
 
       dbLogger.info(`Deleted ${result.length} old messages`);

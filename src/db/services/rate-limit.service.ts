@@ -42,7 +42,7 @@ export class RateLimitService {
             eq(rateLimits.sessionId, sessionId),
             eq(rateLimits.recipient, recipient),
             eq(rateLimits.period, period),
-            gte(rateLimits.resetAt, now.toISOString())
+            gte(rateLimits.resetAt, now)
           )
         )
         .limit(1);
@@ -143,7 +143,7 @@ export class RateLimitService {
    */
   static async getSessionCounters(sessionId: string): Promise<RateLimit[]> {
     try {
-      const now = new Date().toISOString();
+      const now = new Date();
       return await db
         .select()
         .from(rateLimits)
@@ -199,7 +199,7 @@ export class RateLimitService {
    */
   static async cleanupExpired(): Promise<number> {
     try {
-      const now = new Date().toISOString();
+      const now = new Date();
       const result = await db
         .delete(rateLimits)
         .where(lte(rateLimits.resetAt, now))

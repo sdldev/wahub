@@ -1,30 +1,29 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { mysqlTable, varchar, int, text, timestamp } from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
 
-export const messages = sqliteTable('messages', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  sessionId: text('session_id').notNull(),
-  from: text('from').notNull(),
-  to: text('to').notNull(),
+export const messages = mysqlTable('messages', {
+  id: int('id').primaryKey().autoincrement(),
+  sessionId: varchar('session_id', { length: 255 }).notNull(),
+  from: varchar('from', { length: 255 }).notNull(),
+  to: varchar('to', { length: 255 }).notNull(),
   content: text('content').notNull(),
-  type: text('type', {
-    enum: ['text', 'image', 'document', 'sticker', 'video'],
-  })
+  type: varchar('type', { length: 20 })
     .notNull()
-    .default('text'),
-  status: text('status', {
-    enum: ['pending', 'processing', 'completed', 'failed'],
-  })
+    .default('text')
+    .$type<'text' | 'image' | 'document' | 'sticker' | 'video'>(),
+  status: varchar('status', { length: 20 })
     .notNull()
-    .default('pending'),
-  retryCount: integer('retry_count').notNull().default(0),
+    .default('pending')
+    .$type<'pending' | 'processing' | 'completed' | 'failed'>(),
+  retryCount: int('retry_count').notNull().default(0),
   error: text('error'),
-  createdAt: text('created_at')
+  createdAt: timestamp('created_at')
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at')
+  updatedAt: timestamp('updated_at')
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => new Date()),
 });
 
 export type Message = typeof messages.$inferSelect;

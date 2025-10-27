@@ -1,25 +1,25 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { mysqlTable, varchar, int, text, timestamp } from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
 
-export const messageQueue = sqliteTable('message_queue', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  sessionId: text('session_id').notNull(),
-  messageData: text('message_data').notNull(), // JSON stringified message data
-  status: text('status', {
-    enum: ['pending', 'processing', 'completed', 'failed'],
-  })
+export const messageQueue = mysqlTable('message_queue', {
+  id: int('id').primaryKey().autoincrement(),
+  sessionId: varchar('session_id', { length: 255 }).notNull(),
+  messageData: text('message_data').notNull(),
+  status: varchar('status', { length: 20 })
     .notNull()
-    .default('pending'),
-  priority: integer('priority').notNull().default(0),
-  scheduledAt: text('scheduled_at'),
-  retryCount: integer('retry_count').notNull().default(0),
+    .default('pending')
+    .$type<'pending' | 'processing' | 'completed' | 'failed'>(),
+  priority: int('priority').notNull().default(0),
+  scheduledAt: timestamp('scheduled_at'),
+  retryCount: int('retry_count').notNull().default(0),
   error: text('error'),
-  createdAt: text('created_at')
+  createdAt: timestamp('created_at')
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at')
+  updatedAt: timestamp('updated_at')
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => new Date()),
 });
 
 export type MessageQueueItem = typeof messageQueue.$inferSelect;

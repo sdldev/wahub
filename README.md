@@ -38,15 +38,17 @@ Sebuah gateway WhatsApp headless yang powerful, ringan, dan mudah di-deploy meng
 ### Phase 2: Foundation & Security ✅ **NEW**
 - ✅ **Multi-User Support** - User management dengan role-based access
 - ✅ **JWT Authentication** - Secure token-based authentication
-- ✅ **Database Integration** - SQLite atau MySQL untuk persistent storage
-- ✅ **MySQL Support** - **Production-ready untuk 1000+ pesan/hari**
+- ✅ **MySQL Database** - Production-ready database untuk 1,000,000+ pesan/hari
+- ✅ **Migration System** - Drizzle ORM untuk database management
+- ✅ **Seed Data** - Dummy data untuk development dan testing
 - ✅ **Message History** - Complete message history tracking
 - ✅ **Structured Logging** - Winston logger dengan file rotation
 - ✅ **Data Encryption** - Enkripsi untuk data sensitif
 - ✅ **API Key per User** - Setiap user memiliki API key sendiri
 
 > 📖 **Dokumentasi Lengkap Phase 2**: [PHASE2-IMPLEMENTATION.md](PHASE2-IMPLEMENTATION.md)
-> 🔄 **MySQL Migration Guide**: [MYSQL-MIGRATION.md](MYSQL-MIGRATION.md) *(Recommended for high volume)*
+> 🔄 **MySQL Setup Guide**: [MYSQL-MIGRATION.md](MYSQL-MIGRATION.md) *(MySQL is required)*
+> 📦 **Database Migrations**: [drizzle/README.md](drizzle/README.md)
 
 ## 📦 Panduan Instalasi
 
@@ -81,7 +83,37 @@ npm install
 bun install
 ```
 
-#### 3. Run Tests (Optional)
+#### 3. Setup MySQL Database
+```bash
+# Connect to MySQL as root
+mysql -u root -p
+
+# Create database and user
+CREATE DATABASE wahub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'wahub_user'@'localhost' IDENTIFIED BY 'your_secure_password';
+GRANT ALL PRIVILEGES ON wahub.* TO 'wahub_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+> 📖 **Detailed MySQL Setup**: See [MYSQL-MIGRATION.md](MYSQL-MIGRATION.md)
+
+#### 4. Configure Environment
+```bash
+cp .env.example .env
+nano .env  # Edit with your MySQL credentials
+```
+
+#### 5. Run Migrations and Seed Data
+```bash
+# Apply database migrations
+npm run db:migrate
+
+# Seed with test data (development only)
+npm run db:seed
+```
+
+#### 6. Run Tests (Optional)
 ```bash
 bun test
 ```
@@ -101,6 +133,19 @@ NODE_ENV=DEVELOPMENT
 PORT=5001
 KEY=your-secret-api-key
 
+# MySQL Database Configuration (Required)
+DB_TYPE=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=wahub_user
+DB_PASSWORD=your_secure_password
+DB_NAME=wahub
+
+# JWT & Security Configuration
+JWT_SECRET=your-jwt-secret-change-in-production
+JWT_EXPIRES_IN=7d
+ENCRYPTION_KEY=your-encryption-key-change-in-production
+
 # Webhook (Optional)
 WEBHOOK_BASE_URL=https://your-webhook-url.com
 
@@ -119,10 +164,19 @@ MAX_RETRY_ATTEMPTS=3             # Jumlah retry jika gagal
 | `NODE_ENV` | Environment mode | DEVELOPMENT | PRODUCTION untuk live |
 | `PORT` | Port server | 5001 | Sesuai kebutuhan |
 | `KEY` | API Key untuk autentikasi | - | String acak yang kuat |
+| `DB_TYPE` | Database type | mysql | mysql (required) |
+| `DB_HOST` | MySQL host | localhost | IP/hostname MySQL |
+| `DB_USER` | MySQL user | wahub_user | Database username |
+| `DB_PASSWORD` | MySQL password | - | Strong password |
+| `DB_NAME` | Database name | wahub | Database name |
+| `JWT_SECRET` | JWT secret key | - | 64-char random string |
+| `ENCRYPTION_KEY` | Encryption key | - | 64-char random string |
 | `MESSAGE_DELAY_MIN` | Delay minimum antar pesan | 3000ms | 3000-5000ms |
 | `MESSAGE_DELAY_MAX` | Delay maksimum antar pesan | 7000ms | 7000-10000ms |
 | `MAX_MESSAGES_PER_MINUTE` | Limit pesan per menit | 20 | 10-30 |
 | `MAX_MESSAGES_PER_HOUR` | Limit pesan per jam | 500 | 300-1000 |
+
+> 🔐 **Generate Secure Keys**: Use `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` to generate JWT_SECRET and ENCRYPTION_KEY
 
 ## 🏃 Menjalankan Server
 

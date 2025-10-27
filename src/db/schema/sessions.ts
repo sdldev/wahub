@@ -1,26 +1,26 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { mysqlTable, varchar, int, text, timestamp } from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
 import { whatsappAccounts } from './whatsapp-accounts';
 
-export const sessions = sqliteTable('sessions', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  accountId: integer('account_id')
+export const sessions = mysqlTable('sessions', {
+  id: int('id').primaryKey().autoincrement(),
+  accountId: int('account_id')
     .notNull()
     .references(() => whatsappAccounts.id, { onDelete: 'cascade' }),
-  sessionName: text('session_name').notNull(),
+  sessionName: varchar('session_name', { length: 255 }).notNull(),
   qrCode: text('qr_code'),
-  status: text('status', {
-    enum: ['active', 'inactive', 'expired'],
-  })
+  status: varchar('status', { length: 20 })
     .notNull()
-    .default('inactive'),
-  lastActive: text('last_active'),
-  createdAt: text('created_at')
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at')
+    .default('inactive')
+    .$type<'active' | 'inactive' | 'expired'>(),
+  lastActive: timestamp('last_active'),
+  createdAt: timestamp('created_at')
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp('updated_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => new Date()),
 });
 
 export type Session = typeof sessions.$inferSelect;
