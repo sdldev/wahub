@@ -48,7 +48,7 @@ export const env = z
       .default('info'),
 
     // Database Configuration
-    DB_TYPE: z.enum(['sqlite', 'mysql']).default('sqlite'),
+    DB_TYPE: z.enum(['mysql']).default('mysql'),
     DB_HOST: z.string().optional(),
     DB_PORT: z
       .string()

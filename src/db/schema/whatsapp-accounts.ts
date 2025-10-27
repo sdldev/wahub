@@ -1,25 +1,25 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { mysqlTable, varchar, int, timestamp } from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
 import { users } from './users';
 
-export const whatsappAccounts = sqliteTable('whatsapp_accounts', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: integer('user_id')
+export const whatsappAccounts = mysqlTable('whatsapp_accounts', {
+  id: int('id').primaryKey().autoincrement(),
+  userId: int('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  phoneNumber: text('phone_number').unique(),
-  sessionId: text('session_id').notNull().unique(),
-  status: text('status', {
-    enum: ['connected', 'disconnected', 'connecting', 'error'],
-  })
+  phoneNumber: varchar('phone_number', { length: 50 }).unique(),
+  sessionId: varchar('session_id', { length: 255 }).notNull().unique(),
+  status: varchar('status', { length: 20 })
     .notNull()
-    .default('disconnected'),
-  createdAt: text('created_at')
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at')
+    .default('disconnected')
+    .$type<'connected' | 'disconnected' | 'connecting' | 'error'>(),
+  createdAt: timestamp('created_at')
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: timestamp('updated_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => new Date()),
 });
 
 export type WhatsappAccount = typeof whatsappAccounts.$inferSelect;
