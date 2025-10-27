@@ -4,6 +4,11 @@ wa_credentials/
 media/*
 !media/.gitkeep
 
+# Build outputs
+dist/
+apps/web/dist/
+apps/api/dist/
+
 # Database files
 data/
 *.db
