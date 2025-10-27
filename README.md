@@ -1,6 +1,38 @@
-# WhatsApp Multi-Session Gateway (Node.js)
+# WhatsApp Multi-Session Gateway (Monorepo)
 
 Sebuah gateway WhatsApp headless yang powerful, ringan, dan mudah di-deploy menggunakan Node.js. Mendukung multiple sessions, multi-device login, dan berbagai jenis pesan termasuk teks, gambar, dan dokumen.
+
+## 🏗️ **NEW: Monorepo Architecture**
+
+**Laravel-style routing pattern** - Frontend dan backend dalam satu repository, di-serve dari satu server:
+
+- 🔗 **Unified Server**: API dan frontend served dari satu port
+- 📡 **API Routes**: Semua endpoint API di bawah `/api/*`
+- 🌐 **Frontend SPA**: React dashboard dengan history API fallback
+- 🚀 **Single Deployment**: Deploy sebagai satu aplikasi
+
+> 📖 **Architecture Guide**: [MONOREPO-ARCHITECTURE.md](MONOREPO-ARCHITECTURE.md)  
+> 🐝 **Bun Alternative**: [BUN-ALTERNATIVE.md](BUN-ALTERNATIVE.md)  
+> ✅ **QA Checklist**: [QA-CHECKLIST.md](QA-CHECKLIST.md)
+
+### Quick Start (Monorepo)
+
+```bash
+# Install dependencies
+npm install
+
+# Build frontend
+npm run build:web
+
+# Setup database (see below for MySQL setup)
+npm run db:migrate
+
+# Start unified server (API + Frontend)
+npm start
+# Server: http://localhost:5001
+# API: http://localhost:5001/api/health
+# Frontend: http://localhost:5001
+```
 
 ## 📋 Table of Contents
 - [Fitur Utama](#-fitur-utama)
@@ -188,6 +220,37 @@ MAX_RETRY_ATTEMPTS=3             # Jumlah retry jika gagal
 > 🔐 **Generate Secure Keys**: Use `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` to generate JWT_SECRET and ENCRYPTION_KEY
 
 ## 🏃 Menjalankan Server
+
+### 🎯 Monorepo Mode (Recommended)
+
+#### Development Mode
+```bash
+# Start both frontend (port 3000) and backend (port 5001)
+npm run dev
+
+# Access:
+# - Frontend: http://localhost:3000
+# - API (proxied): http://localhost:3000/api/health
+# - Backend direct: http://localhost:5001/api/health
+```
+
+**Features:**
+- Hot module replacement untuk frontend
+- Auto-reload untuk backend
+- Proxy otomatis `/api/*` ke backend
+- No CORS issues
+
+#### Production Mode
+```bash
+# Build frontend
+npm run build:web
+
+# Start unified server (API + Frontend di port 5001)
+npm start
+
+# Access:
+# - Frontend & API: http://localhost:5001
+```
 
 ### 🐳 Dengan Docker (Recommended)
 ```bash
