@@ -165,7 +165,7 @@ export class SessionManagementService {
   static async onSessionConnected(sessionId: string, connectionInfo?: any): Promise<void> {
     try {
       // Check if account exists, if not we need to handle gracefully
-      let account = await WhatsappAccountService.findBySessionId(sessionId);
+      const account = await WhatsappAccountService.findBySessionId(sessionId);
 
       if (!account) {
         // Account doesn't exist yet - this can happen if session was started
