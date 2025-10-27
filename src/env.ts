@@ -46,6 +46,17 @@ export const env = z
     LOG_LEVEL: z
       .enum(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'])
       .default('info'),
+
+    // Database Configuration
+    DB_TYPE: z.enum(['sqlite', 'mysql']).default('sqlite'),
+    DB_HOST: z.string().optional(),
+    DB_PORT: z
+      .string()
+      .optional()
+      .transform((e) => (e ? Number(e) : undefined)),
+    DB_USER: z.string().optional(),
+    DB_PASSWORD: z.string().optional(),
+    DB_NAME: z.string().default('wahub'),
   })
   .refine(
     (data) => {
@@ -55,5 +66,19 @@ export const env = z
       return true;
     },
     { message: 'KEY is required in PRODUCTION environment' }
+  )
+  .refine(
+    (data) => {
+      if (data.DB_TYPE === 'mysql') {
+        if (!data.DB_HOST || !data.DB_USER || !data.DB_PASSWORD) {
+          return false;
+        }
+      }
+      return true;
+    },
+    {
+      message:
+        'DB_HOST, DB_USER, and DB_PASSWORD are required when DB_TYPE is mysql',
+    }
   )
   .parse(process.env);
