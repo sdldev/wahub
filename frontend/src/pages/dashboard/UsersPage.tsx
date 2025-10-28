@@ -21,8 +21,10 @@ import { userService, type User } from '@/services/userService';
 interface UserFormData {
   email: string;
   password: string;
-  role: 'admin' | 'user';
-  name: string;
+  phone: string;
+  role: 'admin' | 'user' | 'readonly';
+  status: 'Active' | 'Pending' | 'Disable';
+  note: string;
 }
 
 export default function UsersPage() {
@@ -38,11 +40,27 @@ export default function UsersPage() {
   const [formData, setFormData] = useState<UserFormData>({
     email: '',
     password: '',
+    phone: '',
     role: 'user',
-    name: '',
+    status: 'Pending',
+    note: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user: currentUser } = useAuth();
+
+  // Check if current user is admin
+  if (!currentUser || currentUser.role !== 'admin') {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Shield className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Access Denied</h3>
+          <p className="text-gray-600">You don't have permission to access user management.</p>
+          <p className="text-sm text-gray-500 mt-2">Only administrators can manage users.</p>
+        </div>
+      </div>
+    );
+  }
 
   // Fetch users from API
   const fetchUsers = async () => {
@@ -76,7 +94,7 @@ export default function UsersPage() {
       
       if (result.success) {
         setShowCreateModal(false);
-        setFormData({ email: '', password: '', role: 'user', name: '' });
+        setFormData({ email: '', password: '', phone: '', role: 'user', status: 'Pending', note: '' });
         fetchUsers(); // Refresh list
         setError('');
       } else {
@@ -99,12 +117,18 @@ export default function UsersPage() {
     setError('');
 
     try {
-      const result = await userService.updateUser(selectedUser.id, formData);
+      // Prepare update data - exclude empty password
+      const updateData: Partial<UserFormData> = { ...formData };
+      if (!updateData.password) {
+        delete (updateData as any).password;
+      }
+      
+      const result = await userService.updateUser(selectedUser.id, updateData);
       
       if (result.success) {
         setShowEditModal(false);
         setSelectedUser(null);
-        setFormData({ email: '', password: '', role: 'user', name: '' });
+        setFormData({ email: '', password: '', phone: '', role: 'user', status: 'Pending', note: '' });
         fetchUsers(); // Refresh list
         setError('');
       } else {
@@ -146,7 +170,8 @@ export default function UsersPage() {
   useEffect(() => {
     const filtered = users.filter(user =>
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      (user.phone && user.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.note && user.note.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     setFilteredUsers(filtered);
   }, [users, searchTerm]);
@@ -157,8 +182,10 @@ export default function UsersPage() {
     setFormData({
       email: user.email,
       password: '',
+      phone: user.phone || '',
       role: user.role,
-      name: user.name || '',
+      status: user.status,
+      note: user.note || '',
     });
     setShowEditModal(true);
   };
@@ -217,7 +244,7 @@ export default function UsersPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search users by email or name..."
+                placeholder="Search users by email, phone, or note..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -266,6 +293,7 @@ export default function UsersPage() {
                   <th className="text-left py-3 px-4 font-medium text-gray-700">User</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Role</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700">Note</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-700">Created</th>
                   <th className="text-right py-3 px-4 font-medium text-gray-700">Actions</th>
                 </tr>
@@ -280,9 +308,9 @@ export default function UsersPage() {
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">
-                            {user.name || 'Unnamed User'}
+                            {user.email}
                           </p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
+                          <p className="text-sm text-gray-500">{user.phone || 'No phone'}</p>
                         </div>
                       </div>
                     </td>
@@ -298,17 +326,27 @@ export default function UsersPage() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-1">
-                        {user.isActive !== false ? (
+                        {user.status === 'Active' ? (
                           <>
                             <UserCheck className="h-4 w-4 text-green-600" />
                             <span className="text-sm text-green-600">Active</span>
                           </>
+                        ) : user.status === 'Pending' ? (
+                          <>
+                            <UserX className="h-4 w-4 text-yellow-600" />
+                            <span className="text-sm text-yellow-600">Pending</span>
+                          </>
                         ) : (
                           <>
                             <UserX className="h-4 w-4 text-red-600" />
-                            <span className="text-sm text-red-600">Inactive</span>
+                            <span className="text-sm text-red-600">Disabled</span>
                           </>
                         )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="text-sm text-gray-600 truncate max-w-xs">
+                        {user.note || '-'}
                       </div>
                     </td>
                     <td className="py-3 px-4">
@@ -323,7 +361,7 @@ export default function UsersPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => openEditModal(user)}
-                          disabled={currentUser?.id === user.id}
+                          disabled={currentUser?.id === user.id.toString()}
                         >
                           <Edit3 className="h-4 w-4" />
                         </Button>
@@ -331,7 +369,7 @@ export default function UsersPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => openDeleteModal(user)}
-                          disabled={currentUser?.id === user.id}
+                          disabled={currentUser?.id === user.id.toString()}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -365,13 +403,13 @@ export default function UsersPage() {
             <h3 className="text-lg font-semibold mb-4">Create New User</h3>
             <form onSubmit={handleCreateUser} className="space-y-4">
               <div>
-                <Label htmlFor="create-name">Name</Label>
+                <Label htmlFor="create-phone">Phone Number</Label>
                 <Input
-                  id="create-name"
-                  type="text"
-                  placeholder="User name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  id="create-phone"
+                  type="tel"
+                  placeholder="628123456789"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 />
               </div>
               <div>
@@ -401,12 +439,37 @@ export default function UsersPage() {
                 <select
                   id="create-role"
                   value={formData.role}
-                  onChange={(e) => setFormData({...formData, role: e.target.value as 'admin' | 'user'})}
+                  onChange={(e) => setFormData({...formData, role: e.target.value as 'admin' | 'user' | 'readonly'})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
+                  <option value="readonly">Read Only</option>
                 </select>
+              </div>
+              <div>
+                <Label htmlFor="create-status">Status</Label>
+                <select
+                  id="create-status"
+                  value={formData.status}
+                  onChange={(e) => setFormData({...formData, status: e.target.value as 'Active' | 'Pending' | 'Disable'})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Active">Active</option>
+                  <option value="Disable">Disabled</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="create-note">Note</Label>
+                <textarea
+                  id="create-note"
+                  placeholder="Optional note about user"
+                  value={formData.note}
+                  onChange={(e) => setFormData({...formData, note: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                />
               </div>
               <div className="flex gap-3 pt-4">
                 <Button type="submit" disabled={isSubmitting} className="flex-1">
@@ -433,13 +496,13 @@ export default function UsersPage() {
             <h3 className="text-lg font-semibold mb-4">Edit User</h3>
             <form onSubmit={handleUpdateUser} className="space-y-4">
               <div>
-                <Label htmlFor="edit-name">Name</Label>
+                <Label htmlFor="edit-phone">Phone Number</Label>
                 <Input
-                  id="edit-name"
-                  type="text"
-                  placeholder="User name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  id="edit-phone"
+                  type="tel"
+                  placeholder="628123456789"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 />
               </div>
               <div>
@@ -454,16 +517,51 @@ export default function UsersPage() {
                 />
               </div>
               <div>
+                <Label htmlFor="edit-password">Password (leave blank to keep current)</Label>
+                <Input
+                  id="edit-password"
+                  type="password"
+                  placeholder="New password (optional)"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                />
+              </div>
+              <div>
                 <Label htmlFor="edit-role">Role</Label>
                 <select
                   id="edit-role"
                   value={formData.role}
-                  onChange={(e) => setFormData({...formData, role: e.target.value as 'admin' | 'user'})}
+                  onChange={(e) => setFormData({...formData, role: e.target.value as 'admin' | 'user' | 'readonly'})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
+                  <option value="readonly">Read Only</option>
                 </select>
+              </div>
+              <div>
+                <Label htmlFor="edit-status">Status</Label>
+                <select
+                  id="edit-status"
+                  value={formData.status}
+                  onChange={(e) => setFormData({...formData, status: e.target.value as 'Active' | 'Pending' | 'Disable'})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Active">Active</option>
+                  <option value="Disable">Disabled</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="edit-note">Note</Label>
+                <textarea
+                  id="edit-note"
+                  placeholder="Optional note about user"
+                  value={formData.note}
+                  onChange={(e) => setFormData({...formData, note: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                />
               </div>
               <div className="flex gap-3 pt-4">
                 <Button type="submit" disabled={isSubmitting} className="flex-1">

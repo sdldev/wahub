@@ -63,6 +63,12 @@ app.use('/message/*', createKeyMiddleware());
 app.use('/profile/*', createKeyMiddleware());
 
 /**
+ * Protected auth routes
+ */
+app.use('/auth/me', createJwtMiddleware());
+app.use('/auth/regenerate-api-key', createJwtMiddleware());
+
+/**
  * Authentication routes (public)
  */
 app.route('/auth', createAuthController());
@@ -73,7 +79,13 @@ app.route('/auth', createAuthController());
 app.route('/user', createUserController());
 
 /**
- * session routes
+ * Session API routes (protected with JWT for user session management)
+ */
+app.use('/api/session/*', createJwtMiddleware());
+app.route('/api/session', createSessionController());
+
+/**
+ * session routes (legacy API key protected)
  */
 app.route('/session', createSessionController());
 /**

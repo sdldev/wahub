@@ -326,6 +326,145 @@ export const createSessionController = () => {
     });
   });
 
+  // Simple API endpoints for frontend session check
+  app.get('/user-status', async (c) => {
+    try {
+      // Get user from JWT middleware context (set by createJwtMiddleware)
+      const user = (c as any).get('user');
+      
+      // Check WhatsApp session for all users (including admin) based on phone number
+      if (user && user.phone) {
+        // Use phone number as session ID
+        const sessionId = user.phone;
+        const waSession = whatsapp.getSession(sessionId);
+        
+        if (waSession) {
+          return c.json({
+            success: true,
+            data: {
+              connected: true,
+              phoneNumber: user.phone,
+              sessionId: sessionId,
+              message: `Connected as ${user.phone}`
+            }
+          });
+        }
+      }
+
+      // No active WhatsApp session found
+      return c.json({
+        success: true,
+        data: {
+          connected: false,
+          message: user?.phone 
+            ? `No WhatsApp session found for ${user.phone}. Please connect your WhatsApp.`
+            : 'Phone number required. Please update your profile with a valid phone number.'
+        }
+      });
+    } catch (error: any) {
+      console.error('Failed to get user session status:', error);
+      return c.json({
+        success: false,
+        error: 'Failed to check session status'
+      }, 500);
+    }
+  });
+
+  app.post('/user-initialize', async (c) => {
+    try {
+      // Get user from JWT middleware context
+      const user = (c as any).get('user');
+      
+      if (!user || !user.phone) {
+        return c.json({
+          success: false,
+          error: 'User phone number is required to create WhatsApp session'
+        }, 400);
+      }
+
+      // Use phone number as session ID (unique per user)
+      const sessionId = user.phone;
+      
+      // Check if session already exists
+      const isExist = whatsapp.getSession(sessionId);
+      if (isExist) {
+        return c.json({
+          success: false,
+          error: 'WhatsApp session already exists for this phone number'
+        }, 400);
+      }
+
+      // Start new WhatsApp session with phone number as session ID
+      const qr = await new Promise<string | null>(async (resolve) => {
+        await whatsapp.startSession(sessionId, {
+          onConnected: async () => {
+            // Session connected, save to database
+            try {
+              const waSession = whatsapp.getSession(sessionId);
+              if (waSession) {
+                await WhatsappAccountService.createAccount(
+                  user.id,
+                  sessionId,
+                  user.phone
+                );
+              }
+            } catch (dbError) {
+              console.error('Failed to save session to database:', dbError);
+            }
+            resolve(null);
+          },
+          onQRUpdated: (qrCode) => {
+            resolve(qrCode);
+          },
+        });
+      });
+
+      if (qr) {
+        // Convert QR to data URL for frontend
+        try {
+          const qrDataURL = await toDataURL(qr, {
+            type: 'image/png',
+            width: 256,
+            margin: 2,
+          });
+
+          return c.json({
+            success: true,
+            data: {
+              qrCode: qrDataURL,
+              sessionId,
+              phoneNumber: user.phone,
+              message: `QR code generated for ${user.phone}. Please scan with WhatsApp to connect.`,
+              expiresIn: 120
+            }
+          });
+        } catch (qrError) {
+          console.error('Failed to generate QR data URL:', qrError);
+          return c.json({
+            success: false,
+            error: 'Failed to generate QR code'
+          }, 500);
+        }
+      }
+
+      return c.json({
+        success: true,
+        data: {
+          connected: true,
+          sessionId,
+          phoneNumber: user.phone,
+          message: `WhatsApp connected successfully for ${user.phone}`
+        }
+      });
+    } catch (error: any) {
+      console.error('Failed to initialize user session:', error);
+      return c.json({
+        success: false,
+        error: 'Failed to initialize WhatsApp session'
+      }, 500);
+    }
+  });
+
   // New endpoint: Cleanup inactive sessions
   app.post('/cleanup', async (c) => {
     const inactiveHours = Number(c.req.query('hours')) || 24;
@@ -338,6 +477,132 @@ export const createSessionController = () => {
         cleanedCount,
       },
     });
+  });
+
+  // New endpoint: Destroy specific user session (Admin only)
+  const destroySessionSchema = z.object({
+    userId: z.number().optional(),
+    phoneNumber: z.string().optional(),
+    sessionId: z.string().optional(),
+  });
+
+  app.post('/destroy-user-session', requestValidator('json', destroySessionSchema), async (c) => {
+    try {
+      const payload = c.req.valid('json');
+      
+      // Get user from JWT middleware context (should be admin)
+      const currentUser = (c as any).get('user');
+      
+      // Only allow admin to destroy other users' sessions
+      if (currentUser?.role !== 'admin') {
+        return c.json({
+          success: false,
+          error: 'Access denied. Admin role required.'
+        }, 403);
+      }
+
+      let sessionId = payload.sessionId;
+      let phoneNumber = payload.phoneNumber;
+
+      // If userId provided, get user's phone number
+      if (payload.userId) {
+        // You might need to add UserService to get user by ID
+        // For now, assume sessionId or phoneNumber is provided
+      }
+
+      // If phone number provided, use as session ID
+      if (phoneNumber && !sessionId) {
+        sessionId = phoneNumber;
+      }
+
+      if (!sessionId) {
+        return c.json({
+          success: false,
+          error: 'Session ID or phone number is required'
+        }, 400);
+      }
+
+      // Check if session exists in WhatsApp
+      const waSession = whatsapp.getSession(sessionId);
+      
+      // Destroy WhatsApp session if exists
+      if (waSession) {
+        await whatsapp.deleteSession(sessionId);
+      }
+
+      // Also clean up from database using SessionManagementService
+      await SessionManagementService.deleteSession(sessionId);
+
+      return c.json({
+        success: true,
+        data: {
+          message: `Session ${sessionId} has been destroyed successfully`,
+          sessionId,
+          phoneNumber: phoneNumber || sessionId
+        }
+      });
+    } catch (error: any) {
+      console.error('Failed to destroy session:', error);
+      return c.json({
+        success: false,
+        error: 'Failed to destroy session'
+      }, 500);
+    }
+  });
+
+  // New endpoint: Get all users for admin (for settings page)
+  app.get('/admin/users', async (c) => {
+    try {
+      // Get user from JWT middleware context (should be admin)
+      const currentUser = (c as any).get('user');
+      
+      if (currentUser?.role !== 'admin') {
+        return c.json({
+          success: false,
+          error: 'Access denied. Admin role required.'
+        }, 403);
+      }
+
+      // Import UserService
+      const { UserService } = await import('../db/services/user.service');
+      
+      // Get all users from database
+      const allUsers = await UserService.listUsers();
+      
+      // Get all WhatsApp accounts from database
+      const accounts = await WhatsappAccountService.listAllAccounts();
+      
+      // Get current sessions from WhatsApp
+      const activeSessions = whatsapp.getAllSession();
+
+      // Map users with their session information
+      const usersWithSessions = allUsers.map((user) => {
+        // Find account for this user
+        const account = accounts.find(acc => acc.userId === user.id);
+        
+        return {
+          userId: user.id,
+          email: user.email,
+          role: user.role,
+          sessionId: account?.sessionId || null,
+          phoneNumber: account?.phoneNumber || null,
+          status: account?.status || null,
+          isActive: account ? activeSessions.includes(account.sessionId) : false,
+          updatedAt: account?.updatedAt || null,
+        };
+      });
+
+      return c.json({
+        success: true,
+        data: usersWithSessions
+      });
+    } catch (error: any) {
+      console.error('Failed to get users:', error);
+      return c.json({
+        success: false,
+        error: 'Failed to get users'
+      }, 500);
+    }
   });
 
   return app;

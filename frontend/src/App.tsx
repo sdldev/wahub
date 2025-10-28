@@ -3,11 +3,12 @@ import { useEffect } from 'react';
 import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { DashboardWrapper } from '@/components/DashboardWrapper';
 import DashboardPage from '@/pages/dashboard/DashboardPage';
 import SessionsPage from '@/pages/dashboard/SessionsPage';
 import MessagesPage from '@/pages/dashboard/MessagesPage';
 import UsersPage from '@/pages/dashboard/UsersPage';
+import SettingsPage from '@/pages/SettingsPage';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { setNavigate } from '@/lib/navigation';
@@ -30,7 +31,7 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardLayout />
+            <DashboardWrapper />
           </ProtectedRoute>
         }
       >
@@ -46,14 +47,7 @@ function AppRoutes() {
           }
         />
         <Route path="users" element={<UsersPage />} />
-        <Route
-          path="settings"
-          element={
-            <div className="text-center py-12 text-muted-foreground">
-              Settings page coming soon...
-            </div>
-          }
-        />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>
   );

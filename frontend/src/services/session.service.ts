@@ -70,4 +70,68 @@ export const sessionService = {
     const response = await api.post(`/session/cleanup?hours=${hours}`);
     return response.data.data;
   },
+
+  // Get current user session status
+  getUserStatus: async (): Promise<{
+    success: boolean;
+    data: {
+      connected: boolean;
+      phoneNumber?: string;
+      sessionId?: string;
+      message: string;
+    };
+  }> => {
+    const response = await api.get('/api/session/user-status');
+    return response.data;
+  },
+
+  // Initialize user session (generate QR for current user)
+  initializeUserSession: async (): Promise<{
+    success: boolean;
+    data: {
+      qrCode?: string;
+      sessionId: string;
+      phoneNumber: string;
+      message: string;
+      expiresIn?: number;
+      connected?: boolean;
+    };
+  }> => {
+    const response = await api.post('/api/session/user-initialize');
+    return response.data;
+  },
+
+  // Destroy user session (Admin only)
+  destroyUserSession: async (data: {
+    userId?: number;
+    phoneNumber?: string;
+    sessionId?: string;
+  }): Promise<{
+    success: boolean;
+    data: {
+      message: string;
+      sessionId: string;
+      phoneNumber: string;
+    };
+  }> => {
+    const response = await api.post('/api/session/destroy-user-session', data);
+    return response.data;
+  },
+
+  // Get all users with session info (Admin only)
+  getAllUsersWithSessions: async (): Promise<{
+    success: boolean;
+    data: Array<{
+      userId: number;
+      sessionId: string;
+      phoneNumber: string;
+      status: string;
+      isActive: boolean;
+      createdAt: string;
+      updatedAt: string;
+    }>;
+  }> => {
+    const response = await api.get('/api/session/admin/users');
+    return response.data;
+  },
 };

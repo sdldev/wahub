@@ -65,11 +65,15 @@ async function createMysqlTables(pool: mysql.Pool) {
       id INT AUTO_INCREMENT PRIMARY KEY,
       email VARCHAR(255) NOT NULL UNIQUE,
       password VARCHAR(255) NOT NULL,
+      phone VARCHAR(20) UNIQUE,
       role VARCHAR(20) NOT NULL DEFAULT 'user',
+      status VARCHAR(20) NOT NULL DEFAULT 'Pending',
+      note TEXT,
       api_key VARCHAR(255) UNIQUE,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      CHECK (role IN ('admin', 'user', 'readonly'))
+      CHECK (role IN ('admin', 'user', 'readonly')),
+      CHECK (status IN ('Active', 'Pending', 'Disable'))
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
     // WhatsApp Accounts table
@@ -144,6 +148,14 @@ async function createMysqlTables(pool: mysql.Pool) {
       CHECK (period IN ('minute', 'hour', 'day'))
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
+    // Add new columns to existing users table (for migration)
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20) UNIQUE;`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'Pending';`,
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS note TEXT;`,
+    
+    // Add constraint check for status if not exists
+    `ALTER TABLE users ADD CONSTRAINT chk_status CHECK (status IN ('Active', 'Pending', 'Disable'));`,
+
     // Create indexes
     `CREATE INDEX IF NOT EXISTS idx_whatsapp_accounts_user_id ON whatsapp_accounts(user_id);`,
     `CREATE INDEX IF NOT EXISTS idx_whatsapp_accounts_session_id ON whatsapp_accounts(session_id);`,
@@ -153,6 +165,8 @@ async function createMysqlTables(pool: mysql.Pool) {
     `CREATE INDEX IF NOT EXISTS idx_message_queue_session_id ON message_queue(session_id);`,
     `CREATE INDEX IF NOT EXISTS idx_message_queue_status ON message_queue(status);`,
     `CREATE INDEX IF NOT EXISTS idx_rate_limits_session_recipient ON rate_limits(session_id, recipient);`,
+    `CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);`,
+    `CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);`,
   ];
 
   for (const query of queries) {

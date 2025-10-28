@@ -3,25 +3,31 @@ const API_BASE_URL = 'http://localhost:5001';
 interface User {
   id: number;
   email: string;
-  role: 'admin' | 'user';
-  name?: string;
+  phone?: string;
+  role: 'admin' | 'user' | 'readonly';
+  status: 'Active' | 'Pending' | 'Disable';
+  note?: string;
   createdAt: string;
   updatedAt: string;
-  isActive?: boolean;
   apiKey?: string;
 }
 
 interface CreateUserData {
   email: string;
   password: string;
-  role: 'admin' | 'user';
-  name?: string;
+  phone?: string;
+  role: 'admin' | 'user' | 'readonly';
+  status?: 'Active' | 'Pending' | 'Disable';
+  note?: string;
 }
 
 interface UpdateUserData {
   email?: string;
-  role?: 'admin' | 'user';
-  name?: string;
+  phone?: string;
+  role?: 'admin' | 'user' | 'readonly';
+  status?: 'Active' | 'Pending' | 'Disable';
+  note?: string;
+  password?: string;
 }
 
 class UserService {
@@ -154,8 +160,38 @@ class UserService {
     return this.updateUser(id, { isActive } as any);
   }
 
-  async changeUserRole(id: number, role: 'admin' | 'user'): Promise<{ success: boolean; data?: User; message?: string }> {
+  async changeUserRole(id: number, role: 'admin' | 'user' | 'readonly'): Promise<{ success: boolean; data?: User; message?: string }> {
     return this.updateUser(id, { role });
+  }
+
+  async changeUserStatus(id: number, status: 'Active' | 'Pending' | 'Disable'): Promise<{ success: boolean; data?: User; message?: string }> {
+    return this.updateUser(id, { status });
+  }
+
+  async requestAccess(accessData: { email: string; phone: string; note?: string }): Promise<{ success: boolean; message?: string; data?: any }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register-access`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(accessData),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error requesting access:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to request access'
+      };
+    }
   }
 }
 

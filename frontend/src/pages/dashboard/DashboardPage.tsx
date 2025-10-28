@@ -1,5 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Activity, MessageSquare, Radio, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Activity, MessageSquare, Radio, Users, LogOut, QrCode, X } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
+import { sessionService } from '@/services/session.service';
 
 const stats = [
   {
@@ -33,11 +37,84 @@ const stats = [
 ];
 
 export default function DashboardPage() {
+  const { user, logout } = useAuth();
+  const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [sessionStatus, setSessionStatus] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const handleScanClick = async () => {
+    setIsLoading(true);
+    setIsQrModalOpen(true);
+    
+    try {
+      // Check current session status first
+      const statusResponse = await sessionService.getUserStatus();
+      
+      if (statusResponse.data.connected) {
+        setSessionStatus(`✅ Already connected to WhatsApp as ${statusResponse.data.phoneNumber}`);
+        setQrCode(null);
+      } else {
+        // Try to initialize new session for QR
+        try {
+          const qrResponse = await sessionService.initializeUserSession();
+          if (qrResponse.success && qrResponse.data.qrCode) {
+            setQrCode(qrResponse.data.qrCode);
+            setSessionStatus(qrResponse.data.message);
+          } else if (qrResponse.data.connected) {
+            setSessionStatus(`✅ ${qrResponse.data.message}`);
+            setQrCode(null);
+          } else {
+            setSessionStatus(qrResponse.data.message || 'Failed to generate QR code');
+            setQrCode(null);
+          }
+        } catch (initError: any) {
+          console.error('Session initialization error:', initError);
+          
+          // Handle specific error cases
+          if (initError.response?.data?.error?.includes('already exists')) {
+            setSessionStatus('⚠️ WhatsApp session already exists. Please disconnect first or check connection status.');
+          } else if (initError.response?.data?.error) {
+            setSessionStatus(`❌ ${initError.response.data.error}`);
+          } else {
+            setSessionStatus('❌ Failed to generate QR code. Please try again.');
+          }
+          setQrCode(null);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error checking session status:', error);
+      setSessionStatus('❌ Failed to check WhatsApp connection status');
+      setQrCode(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
-        <p className="text-muted-foreground">Welcome to your WhatsApp Gateway dashboard</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
+          <p className="text-muted-foreground">
+            Welcome back, {user?.email || 'User'}! Manage your WhatsApp Gateway
+          </p>
+        </div>
+        {user?.role === 'admin' ? (
+          <Button variant="outline" onClick={handleScanClick} className="flex items-center gap-2">
+            <QrCode className="h-4 w-4" />
+            Scan
+          </Button>
+        ) : (
+          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -120,6 +197,53 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* QR Modal for Admin */}
+      {isQrModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">WhatsApp Connection</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsQrModalOpen(false)}
+                className="p-2"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="text-center">
+              {isLoading ? (
+                <div className="py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                  <p className="mt-2 text-sm text-gray-600">Loading...</p>
+                </div>
+              ) : qrCode ? (
+                <div className="py-4">
+                  <img 
+                    src={qrCode} 
+                    alt="WhatsApp QR Code" 
+                    className="mx-auto mb-4 border rounded-lg"
+                    style={{ maxWidth: '256px', height: 'auto' }}
+                  />
+                  <p className="text-sm text-gray-600 mb-2">
+                    Scan this QR code with your WhatsApp
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    QR code expires in 2 minutes
+                  </p>
+                </div>
+              ) : (
+                <div className="py-4">
+                  <p className="text-sm text-gray-600">{sessionStatus}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
