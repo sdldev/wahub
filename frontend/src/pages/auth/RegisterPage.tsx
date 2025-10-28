@@ -24,10 +24,10 @@ export default function RegisterPage() {
     }
 
     setIsLoading(true);
-    
+
     // TODO: Implement actual registration logic with backend API
     console.log('Register attempt:', formData);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
@@ -36,7 +36,7 @@ export default function RegisterPage() {
   };
 
   const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   return (
@@ -44,9 +44,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-          <CardDescription>
-            Enter your information to create your account
-          </CardDescription>
+          <CardDescription>Enter your information to create your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">

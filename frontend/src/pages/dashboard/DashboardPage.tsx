@@ -37,9 +37,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
-        <p className="text-muted-foreground">
-          Welcome to your WhatsApp Gateway dashboard
-        </p>
+        <p className="text-muted-foreground">Welcome to your WhatsApp Gateway dashboard</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -86,7 +84,9 @@ export default function DashboardPage() {
                 <div className="h-2 w-2 rounded-full bg-orange-600" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">Queue processing</p>
-                  <p className="text-xs text-muted-foreground">12 messages pending - 10 minutes ago</p>
+                  <p className="text-xs text-muted-foreground">
+                    12 messages pending - 10 minutes ago
+                  </p>
                 </div>
               </div>
             </div>

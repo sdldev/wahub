@@ -21,14 +21,33 @@ function AppRoutes() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      
+
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<DashboardPage />} />
         <Route path="sessions" element={<SessionsPage />} />
         <Route path="messages" element={<MessagesPage />} />
-        <Route path="analytics" element={<div className="text-center py-12 text-muted-foreground">Analytics page coming soon...</div>} />
-        <Route path="users" element={<div className="text-center py-12 text-muted-foreground">Users page coming soon...</div>} />
-        <Route path="settings" element={<div className="text-center py-12 text-muted-foreground">Settings page coming soon...</div>} />
+        <Route
+          path="analytics"
+          element={
+            <div className="text-center py-12 text-muted-foreground">
+              Analytics page coming soon...
+            </div>
+          }
+        />
+        <Route
+          path="users"
+          element={
+            <div className="text-center py-12 text-muted-foreground">Users page coming soon...</div>
+          }
+        />
+        <Route
+          path="settings"
+          element={
+            <div className="text-center py-12 text-muted-foreground">
+              Settings page coming soon...
+            </div>
+          }
+        />
       </Route>
     </Routes>
   );
@@ -43,4 +62,3 @@ function App() {
 }
 
 export default App;
-

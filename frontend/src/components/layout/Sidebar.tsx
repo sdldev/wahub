@@ -1,12 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  Users, 
-  BarChart3, 
-  Settings,
-  Send,
-  Radio
-} from 'lucide-react';
+import { Home, Users, BarChart3, Settings, Send, Radio } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [

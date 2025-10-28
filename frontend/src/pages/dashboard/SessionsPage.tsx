@@ -45,9 +45,7 @@ export default function SessionsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">WhatsApp Sessions</h2>
-          <p className="text-muted-foreground">
-            Manage your connected WhatsApp accounts
-          </p>
+          <p className="text-muted-foreground">Manage your connected WhatsApp accounts</p>
         </div>
         <Button onClick={() => setShowAddDialog(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -88,9 +86,7 @@ export default function SessionsPage() {
         <Card className="border-primary">
           <CardHeader>
             <CardTitle>Scan QR Code</CardTitle>
-            <CardDescription>
-              Open WhatsApp on your phone and scan this QR code
-            </CardDescription>
+            <CardDescription>Open WhatsApp on your phone and scan this QR code</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-4">
             <div className="flex h-64 w-64 items-center justify-center rounded-lg border-2 border-dashed">
@@ -115,9 +111,7 @@ export default function SessionsPage() {
                 <div className="flex items-center gap-2">
                   <Radio
                     className={`h-4 w-4 ${
-                      session.status === 'connected'
-                        ? 'text-green-600'
-                        : 'text-gray-400'
+                      session.status === 'connected' ? 'text-green-600' : 'text-gray-400'
                     }`}
                   />
                   <CardTitle className="text-base">{session.id}</CardTitle>
@@ -141,9 +135,7 @@ export default function SessionsPage() {
                 <span className="text-muted-foreground">Status</span>
                 <span
                   className={`font-medium ${
-                    session.status === 'connected'
-                      ? 'text-green-600'
-                      : 'text-gray-500'
+                    session.status === 'connected' ? 'text-green-600' : 'text-gray-500'
                   }`}
                 >
                   {session.status}

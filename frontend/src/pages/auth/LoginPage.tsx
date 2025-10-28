@@ -12,10 +12,10 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // TODO: Implement actual login logic with backend API
     console.log('Login attempt:', { email, password });
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
@@ -28,9 +28,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Login</CardTitle>
-          <CardDescription>
-            Enter your email and password to access the dashboard
-          </CardDescription>
+          <CardDescription>Enter your email and password to access the dashboard</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">

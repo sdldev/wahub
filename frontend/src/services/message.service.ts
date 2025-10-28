@@ -45,19 +45,25 @@ export interface QueueStatus {
 
 export const messageService = {
   // Send text message
-  sendText: async (data: SendTextMessageRequest): Promise<{ success: boolean; message: string }> => {
+  sendText: async (
+    data: SendTextMessageRequest
+  ): Promise<{ success: boolean; message: string }> => {
     const response = await api.post('/message/send-text', data);
     return response.data;
   },
 
   // Send image message
-  sendImage: async (data: SendImageMessageRequest): Promise<{ success: boolean; message: string }> => {
+  sendImage: async (
+    data: SendImageMessageRequest
+  ): Promise<{ success: boolean; message: string }> => {
     const response = await api.post('/message/send-image', data);
     return response.data;
   },
 
   // Send document message
-  sendDocument: async (data: SendDocumentMessageRequest): Promise<{ success: boolean; message: string }> => {
+  sendDocument: async (
+    data: SendDocumentMessageRequest
+  ): Promise<{ success: boolean; message: string }> => {
     const response = await api.post('/message/send-document', data);
     return response.data;
   },

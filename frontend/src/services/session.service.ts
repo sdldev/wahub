@@ -59,13 +59,17 @@ export const sessionService = {
   },
 
   // Check if phone number has active session
-  checkPhoneNumber: async (phoneNumber: string): Promise<{ hasActiveSession: boolean; session?: Session }> => {
+  checkPhoneNumber: async (
+    phoneNumber: string
+  ): Promise<{ hasActiveSession: boolean; session?: Session }> => {
     const response = await api.post('/session/check-phone', { phoneNumber });
     return response.data;
   },
 
   // Cleanup inactive sessions
-  cleanupSessions: async (hours: number = 24): Promise<{ message: string; cleanedCount: number }> => {
+  cleanupSessions: async (
+    hours: number = 24
+  ): Promise<{ message: string; cleanedCount: number }> => {
     const response = await api.post('/session/cleanup', { hours });
     return response.data.data;
   },

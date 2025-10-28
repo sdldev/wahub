@@ -1,29 +1,30 @@
 # Multi-stage build untuk optimasi size
-FROM node:18-alpine AS builder
+FROM oven/bun:1.1.34-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++ libstdc++
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files dari backend
 COPY backend/package*.json ./
-COPY backend/pnpm-lock.yaml* ./
 COPY backend/bun.lockb* ./
 
-# Install pnpm
-RUN npm install -g pnpm
-
 # Install dependencies
-RUN pnpm install --frozen-lockfile || npm install
+RUN bun install --frozen-lockfile
 
 # Copy source code backend dan build
 COPY backend/ .
-RUN pnpm run build || npm run build
+
+# Build with Bun
+RUN bun run build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM oven/bun:1.1.34-alpine AS production
 
-# Install dumb-init untuk proper signal handling
-RUN apk add --no-cache dumb-init
+# Install runtime dependencies
+RUN apk add --no-cache dumb-init libstdc++
 
 # Create app user
 RUN addgroup -g 1001 -S nodejs
@@ -35,11 +36,8 @@ WORKDIR /app
 # Copy package files
 COPY backend/package*.json ./
 
-# Install pnpm
-RUN npm install -g pnpm
-
-# Install only production dependencies
-RUN pnpm install --frozen-lockfile --production || npm install --production
+# Install production dependencies  
+RUN bun install --frozen-lockfile --production
 
 # Copy built application dari builder stage
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist

@@ -41,9 +41,7 @@ export default function MessagesPage() {
                   id="session"
                   placeholder="Select or enter session ID"
                   value={messageData.session}
-                  onChange={(e) =>
-                    setMessageData({ ...messageData, session: e.target.value })
-                  }
+                  onChange={(e) => setMessageData({ ...messageData, session: e.target.value })}
                 />
               </div>
 
@@ -53,9 +51,7 @@ export default function MessagesPage() {
                   id="recipient"
                   placeholder="+62812345678"
                   value={messageData.recipient}
-                  onChange={(e) =>
-                    setMessageData({ ...messageData, recipient: e.target.value })
-                  }
+                  onChange={(e) => setMessageData({ ...messageData, recipient: e.target.value })}
                 />
               </div>
 
@@ -66,9 +62,7 @@ export default function MessagesPage() {
                   className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   placeholder="Type your message here..."
                   value={messageData.message}
-                  onChange={(e) =>
-                    setMessageData({ ...messageData, message: e.target.value })
-                  }
+                  onChange={(e) => setMessageData({ ...messageData, message: e.target.value })}
                 />
               </div>
 
@@ -139,12 +133,13 @@ export default function MessagesPage() {
         <CardContent>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+              <div
+                key={i}
+                className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+              >
                 <div className="space-y-1">
                   <p className="text-sm font-medium">+62 812 3456 789{i}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Hello, this is a test message
-                  </p>
+                  <p className="text-xs text-muted-foreground">Hello, this is a test message</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-muted-foreground">{i} min ago</p>
