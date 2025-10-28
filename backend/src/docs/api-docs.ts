@@ -2,12 +2,7 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 
 // Import route definitions
-import {
-  registerRoute,
-  loginRoute,
-  getMeRoute,
-  regenerateApiKeyRoute,
-} from './auth-routes';
+import { registerRoute, loginRoute, getMeRoute, regenerateApiKeyRoute } from './auth-routes';
 import {
   sendTextMessageRoute,
   sendImageMessageRoute,

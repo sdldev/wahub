@@ -107,16 +107,16 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
             properties: {
               id: { type: 'integer', example: 1 },
               email: { type: 'string', format: 'email', example: 'user@example.com' },
-              role: { 
-                type: 'string', 
-                enum: ['admin', 'user', 'readonly'], 
-                example: 'user' 
+              role: {
+                type: 'string',
+                enum: ['admin', 'user', 'readonly'],
+                example: 'user',
               },
               apiKey: { type: 'string', example: 'abc123456789...' },
-              createdAt: { 
-                type: 'string', 
-                format: 'date-time', 
-                example: '2025-10-28T01:00:00.000Z' 
+              createdAt: {
+                type: 'string',
+                format: 'date-time',
+                example: '2025-10-28T01:00:00.000Z',
               },
             },
           },
@@ -138,25 +138,25 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
             type: 'object',
             required: ['session', 'to', 'text'],
             properties: {
-              session: { 
-                type: 'string', 
+              session: {
+                type: 'string',
                 example: '62812345678',
-                description: 'WhatsApp session ID (phone number)' 
+                description: 'WhatsApp session ID (phone number)',
               },
-              to: { 
-                type: 'string', 
+              to: {
+                type: 'string',
                 example: '6287654321',
-                description: 'Recipient phone number' 
+                description: 'Recipient phone number',
               },
-              text: { 
-                type: 'string', 
+              text: {
+                type: 'string',
                 example: 'Hello World!',
-                description: 'Message content' 
+                description: 'Message content',
               },
-              is_group: { 
-                type: 'boolean', 
+              is_group: {
+                type: 'boolean',
                 example: false,
-                description: 'Whether recipient is a group' 
+                description: 'Whether recipient is a group',
               },
             },
           },
@@ -164,14 +164,14 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
             type: 'object',
             properties: {
               session: { type: 'string', example: '62812345678' },
-              status: { 
-                type: 'string', 
+              status: {
+                type: 'string',
                 enum: ['connecting', 'connected', 'disconnected', 'qr_required'],
-                example: 'connected' 
+                example: 'connected',
               },
-              qr: { 
-                type: 'string', 
-                description: 'QR code base64 (when status is qr_required)' 
+              qr: {
+                type: 'string',
+                description: 'QR code base64 (when status is qr_required)',
               },
               phoneNumber: { type: 'string', example: '+62812345678' },
             },
@@ -217,22 +217,22 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                     type: 'object',
                     required: ['email', 'password'],
                     properties: {
-                      email: { 
-                        type: 'string', 
-                        format: 'email', 
-                        example: 'user@example.com' 
+                      email: {
+                        type: 'string',
+                        format: 'email',
+                        example: 'user@example.com',
                       },
-                      password: { 
-                        type: 'string', 
+                      password: {
+                        type: 'string',
                         minLength: 8,
                         example: 'SecurePass123',
-                        description: 'Min 8 chars with uppercase, lowercase, number' 
+                        description: 'Min 8 chars with uppercase, lowercase, number',
                       },
-                      role: { 
-                        type: 'string', 
+                      role: {
+                        type: 'string',
                         enum: ['admin', 'user', 'readonly'],
                         example: 'user',
-                        description: 'User role (default: user)' 
+                        description: 'User role (default: user)',
                       },
                     },
                   },
@@ -251,7 +251,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                         data: {
                           type: 'object',
                           properties: {
-                            user: { '$ref': '#/components/schemas/User' },
+                            user: { $ref: '#/components/schemas/User' },
                             token: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIs...' },
                           },
                         },
@@ -264,7 +264,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                 description: 'Bad request',
                 content: {
                   'application/json': {
-                    schema: { '$ref': '#/components/schemas/ErrorResponse' },
+                    schema: { $ref: '#/components/schemas/ErrorResponse' },
                   },
                 },
               },
@@ -303,7 +303,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                         data: {
                           type: 'object',
                           properties: {
-                            user: { '$ref': '#/components/schemas/User' },
+                            user: { $ref: '#/components/schemas/User' },
                             token: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIs...' },
                           },
                         },
@@ -316,7 +316,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                 description: 'Invalid credentials',
                 content: {
                   'application/json': {
-                    schema: { '$ref': '#/components/schemas/ErrorResponse' },
+                    schema: { $ref: '#/components/schemas/ErrorResponse' },
                   },
                 },
               },
@@ -338,7 +338,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                       type: 'object',
                       properties: {
                         success: { type: 'boolean', example: true },
-                        data: { '$ref': '#/components/schemas/User' },
+                        data: { $ref: '#/components/schemas/User' },
                       },
                     },
                   },
@@ -348,7 +348,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                 description: 'Not authenticated',
                 content: {
                   'application/json': {
-                    schema: { '$ref': '#/components/schemas/ErrorResponse' },
+                    schema: { $ref: '#/components/schemas/ErrorResponse' },
                   },
                 },
               },
@@ -398,15 +398,15 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                     type: 'object',
                     required: ['session', 'phoneNumber'],
                     properties: {
-                      session: { 
-                        type: 'string', 
+                      session: {
+                        type: 'string',
                         example: '62812345678',
-                        description: 'Session ID (phone number without +)' 
+                        description: 'Session ID (phone number without +)',
                       },
-                      phoneNumber: { 
-                        type: 'string', 
+                      phoneNumber: {
+                        type: 'string',
                         example: '+62812345678',
-                        description: 'Phone number with country code' 
+                        description: 'Phone number with country code',
                       },
                     },
                   },
@@ -422,7 +422,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                       type: 'object',
                       properties: {
                         success: { type: 'boolean', example: true },
-                        data: { '$ref': '#/components/schemas/SessionStatus' },
+                        data: { $ref: '#/components/schemas/SessionStatus' },
                       },
                     },
                   },
@@ -432,7 +432,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                 description: 'Invalid phone number',
                 content: {
                   'application/json': {
-                    schema: { '$ref': '#/components/schemas/ErrorResponse' },
+                    schema: { $ref: '#/components/schemas/ErrorResponse' },
                   },
                 },
               },
@@ -463,7 +463,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                       type: 'object',
                       properties: {
                         success: { type: 'boolean', example: true },
-                        data: { '$ref': '#/components/schemas/SessionStatus' },
+                        data: { $ref: '#/components/schemas/SessionStatus' },
                       },
                     },
                   },
@@ -482,7 +482,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
               required: true,
               content: {
                 'application/json': {
-                  schema: { '$ref': '#/components/schemas/MessagePayload' },
+                  schema: { $ref: '#/components/schemas/MessagePayload' },
                 },
               },
             },
@@ -514,7 +514,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                 description: 'Invalid request data',
                 content: {
                   'application/json': {
-                    schema: { '$ref': '#/components/schemas/ErrorResponse' },
+                    schema: { $ref: '#/components/schemas/ErrorResponse' },
                   },
                 },
               },
@@ -538,10 +538,10 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                       session: { type: 'string', example: '62812345678' },
                       to: { type: 'string', example: '6287654321' },
                       text: { type: 'string', example: 'Image caption' },
-                      image_url: { 
-                        type: 'string', 
+                      image_url: {
+                        type: 'string',
                         format: 'uri',
-                        example: 'https://example.com/image.jpg' 
+                        example: 'https://example.com/image.jpg',
                       },
                       is_group: { type: 'boolean', example: false },
                     },
@@ -554,7 +554,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                 description: 'Image message sent successfully',
                 content: {
                   'application/json': {
-                    schema: { '$ref': '#/components/schemas/SuccessResponse' },
+                    schema: { $ref: '#/components/schemas/SuccessResponse' },
                   },
                 },
               },
@@ -609,7 +609,7 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
         },
       },
     };
-    
+
     return c.json(spec);
   });
 

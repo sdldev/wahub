@@ -3,34 +3,34 @@ import { ErrorResponseSchema, SuccessResponseSchema } from './auth-routes';
 
 // Message Schemas
 const SendTextMessageSchema = z.object({
-  session: z.string().openapi({ 
+  session: z.string().openapi({
     example: '62812345678',
-    description: 'WhatsApp session ID (phone number)' 
+    description: 'WhatsApp session ID (phone number)',
   }),
-  to: z.string().openapi({ 
+  to: z.string().openapi({
     example: '6287654321',
-    description: 'Recipient phone number' 
+    description: 'Recipient phone number',
   }),
-  text: z.string().openapi({ 
+  text: z.string().openapi({
     example: 'Hello World!',
-    description: 'Message content' 
+    description: 'Message content',
   }),
-  is_group: z.boolean().optional().openapi({ 
+  is_group: z.boolean().optional().openapi({
     example: false,
-    description: 'Whether the recipient is a group' 
+    description: 'Whether the recipient is a group',
   }),
 });
 
 const SendImageMessageSchema = z.object({
   session: z.string().openapi({ example: '62812345678' }),
   to: z.string().openapi({ example: '6287654321' }),
-  text: z.string().optional().openapi({ 
+  text: z.string().optional().openapi({
     example: 'Image caption',
-    description: 'Optional image caption' 
+    description: 'Optional image caption',
   }),
-  image_url: z.string().url().openapi({ 
+  image_url: z.string().url().openapi({
     example: 'https://example.com/image.jpg',
-    description: 'URL of the image to send' 
+    description: 'URL of the image to send',
   }),
   is_group: z.boolean().optional().openapi({ example: false }),
 });
@@ -38,17 +38,17 @@ const SendImageMessageSchema = z.object({
 const SendDocumentMessageSchema = z.object({
   session: z.string().openapi({ example: '62812345678' }),
   to: z.string().openapi({ example: '6287654321' }),
-  text: z.string().optional().openapi({ 
+  text: z.string().optional().openapi({
     example: 'Document description',
-    description: 'Optional document description' 
+    description: 'Optional document description',
   }),
-  document_url: z.string().url().openapi({ 
+  document_url: z.string().url().openapi({
     example: 'https://example.com/document.pdf',
-    description: 'URL of the document to send' 
+    description: 'URL of the document to send',
   }),
-  document_name: z.string().openapi({ 
+  document_name: z.string().openapi({
     example: 'document.pdf',
-    description: 'Name of the document file' 
+    description: 'Name of the document file',
   }),
   is_group: z.boolean().optional().openapi({ example: false }),
 });
@@ -60,13 +60,13 @@ const MessageResponseSchema = z.object({
     to: z.string().openapi({ example: '6287654321' }),
     text: z.string().openapi({ example: 'Hello World!' }),
     timestamp: z.string().openapi({ example: '2025-10-28T01:00:00.000Z' }),
-    messageId: z.string().optional().openapi({ 
+    messageId: z.string().optional().openapi({
       example: 'msg_123456',
-      description: 'WhatsApp message ID' 
+      description: 'WhatsApp message ID',
     }),
-    status: z.string().openapi({ 
-      example: 'queued', 
-      description: 'Message status' 
+    status: z.string().openapi({
+      example: 'queued',
+      description: 'Message status',
     }),
   }),
 });
@@ -221,17 +221,17 @@ export const getMessageHistoryRoute = createRoute({
   security: [{ ApiKeyAuth: [] }],
   request: {
     query: z.object({
-      session: z.string().openapi({ 
+      session: z.string().openapi({
         example: '62812345678',
-        description: 'WhatsApp session ID' 
+        description: 'WhatsApp session ID',
       }),
-      limit: z.string().optional().openapi({ 
+      limit: z.string().optional().openapi({
         example: '50',
-        description: 'Number of messages to retrieve (default: 50)' 
+        description: 'Number of messages to retrieve (default: 50)',
       }),
-      offset: z.string().optional().openapi({ 
+      offset: z.string().optional().openapi({
         example: '0',
-        description: 'Offset for pagination (default: 0)' 
+        description: 'Offset for pagination (default: 0)',
       }),
     }),
   },
@@ -243,15 +243,17 @@ export const getMessageHistoryRoute = createRoute({
           schema: z.object({
             success: z.boolean().openapi({ example: true }),
             data: z.object({
-              messages: z.array(z.object({
-                id: z.number().openapi({ example: 1 }),
-                sessionId: z.string().openapi({ example: '62812345678' }),
-                to: z.string().openapi({ example: '6287654321' }),
-                message: z.string().openapi({ example: 'Hello World!' }),
-                messageType: z.string().openapi({ example: 'text' }),
-                status: z.string().openapi({ example: 'sent' }),
-                timestamp: z.string().openapi({ example: '2025-10-28T01:00:00.000Z' }),
-              })),
+              messages: z.array(
+                z.object({
+                  id: z.number().openapi({ example: 1 }),
+                  sessionId: z.string().openapi({ example: '62812345678' }),
+                  to: z.string().openapi({ example: '6287654321' }),
+                  message: z.string().openapi({ example: 'Hello World!' }),
+                  messageType: z.string().openapi({ example: 'text' }),
+                  status: z.string().openapi({ example: 'sent' }),
+                  timestamp: z.string().openapi({ example: '2025-10-28T01:00:00.000Z' }),
+                })
+              ),
               total: z.number().openapi({ example: 100 }),
               limit: z.number().openapi({ example: 50 }),
               offset: z.number().openapi({ example: 0 }),

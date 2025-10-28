@@ -3,24 +3,24 @@ import { ErrorResponseSchema } from './auth-routes';
 
 // Session Schemas
 const CreateSessionSchema = z.object({
-  session: z.string().openapi({ 
+  session: z.string().openapi({
     example: '62812345678',
-    description: 'WhatsApp session ID (phone number without + prefix)' 
+    description: 'WhatsApp session ID (phone number without + prefix)',
   }),
-  phoneNumber: z.string().openapi({ 
+  phoneNumber: z.string().openapi({
     example: '+62812345678',
-    description: 'Phone number with country code' 
+    description: 'Phone number with country code',
   }),
 });
 
 const SessionQuerySchema = z.object({
-  session: z.string().openapi({ 
+  session: z.string().openapi({
     example: '62812345678',
-    description: 'WhatsApp session ID' 
+    description: 'WhatsApp session ID',
   }),
-  phoneNumber: z.string().optional().openapi({ 
+  phoneNumber: z.string().optional().openapi({
     example: '+62812345678',
-    description: 'Phone number with country code' 
+    description: 'Phone number with country code',
   }),
 });
 
@@ -28,17 +28,17 @@ const SessionStatusSchema = z.object({
   success: z.boolean().openapi({ example: true }),
   data: z.object({
     session: z.string().openapi({ example: '62812345678' }),
-    status: z.enum(['connecting', 'connected', 'disconnected', 'qr_required']).openapi({ 
+    status: z.enum(['connecting', 'connected', 'disconnected', 'qr_required']).openapi({
       example: 'connected',
-      description: 'Current session status' 
+      description: 'Current session status',
     }),
-    qr: z.string().optional().openapi({ 
-      description: 'QR code base64 string (only when status is qr_required)' 
+    qr: z.string().optional().openapi({
+      description: 'QR code base64 string (only when status is qr_required)',
     }),
     phoneNumber: z.string().optional().openapi({ example: '+62812345678' }),
-    connectedAt: z.string().optional().openapi({ 
+    connectedAt: z.string().optional().openapi({
       example: '2025-10-28T01:00:00.000Z',
-      description: 'When the session was connected' 
+      description: 'When the session was connected',
     }),
   }),
 });
@@ -144,8 +144,8 @@ export const getQRCodeRoute = createRoute({
           schema: z.object({
             success: z.boolean().openapi({ example: true }),
             data: z.object({
-              qr: z.string().openapi({ 
-                description: 'QR code as base64 string or data URL' 
+              qr: z.string().openapi({
+                description: 'QR code as base64 string or data URL',
               }),
               session: z.string().openapi({ example: '62812345678' }),
             }),
@@ -184,9 +184,9 @@ export const deleteSessionRoute = createRoute({
       content: {
         'application/json': {
           schema: z.object({
-            session: z.string().openapi({ 
+            session: z.string().openapi({
               example: '62812345678',
-              description: 'WhatsApp session ID to delete' 
+              description: 'WhatsApp session ID to delete',
             }),
           }),
         },
@@ -238,17 +238,19 @@ export const listSessionsRoute = createRoute({
         'application/json': {
           schema: z.object({
             success: z.boolean().openapi({ example: true }),
-            data: z.array(z.object({
-              session: z.string().openapi({ example: '62812345678' }),
-              status: z.string().openapi({ example: 'connected' }),
-              phoneNumber: z.string().openapi({ example: '+62812345678' }),
-              connectedAt: z.string().optional().openapi({ 
-                example: '2025-10-28T01:00:00.000Z' 
-              }),
-              lastActivity: z.string().optional().openapi({ 
-                example: '2025-10-28T01:30:00.000Z' 
-              }),
-            })),
+            data: z.array(
+              z.object({
+                session: z.string().openapi({ example: '62812345678' }),
+                status: z.string().openapi({ example: 'connected' }),
+                phoneNumber: z.string().openapi({ example: '+62812345678' }),
+                connectedAt: z.string().optional().openapi({
+                  example: '2025-10-28T01:00:00.000Z',
+                }),
+                lastActivity: z.string().optional().openapi({
+                  example: '2025-10-28T01:30:00.000Z',
+                }),
+              })
+            ),
           }),
         },
       },
@@ -264,8 +266,4 @@ export const listSessionsRoute = createRoute({
   },
 });
 
-export {
-  CreateSessionSchema,
-  SessionQuerySchema,
-  SessionStatusSchema,
-};
+export { CreateSessionSchema, SessionQuerySchema, SessionStatusSchema };

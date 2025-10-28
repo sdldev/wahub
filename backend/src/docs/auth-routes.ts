@@ -1,45 +1,51 @@
 import { createRoute, z } from '@hono/zod-openapi';
 
 // Schemas
-const UserSchema = z.object({
-  id: z.number().openapi({ example: 1 }),
-  email: z.string().email().openapi({ example: 'user@example.com' }),
-  role: z.enum(['admin', 'user', 'readonly']).openapi({ example: 'user' }),
-  apiKey: z.string().openapi({ example: 'abc123456789...' }),
-  createdAt: z.string().openapi({ example: '2025-10-28T01:00:00.000Z' }),
-}).openapi('User');
+const UserSchema = z
+  .object({
+    id: z.number().openapi({ example: 1 }),
+    email: z.string().email().openapi({ example: 'user@example.com' }),
+    role: z.enum(['admin', 'user', 'readonly']).openapi({ example: 'user' }),
+    apiKey: z.string().openapi({ example: 'abc123456789...' }),
+    createdAt: z.string().openapi({ example: '2025-10-28T01:00:00.000Z' }),
+  })
+  .openapi('User');
 
-const SuccessResponseSchema = z.object({
-  success: z.boolean().openapi({ example: true }),
-  data: z.any(),
-}).openapi('SuccessResponse');
+const SuccessResponseSchema = z
+  .object({
+    success: z.boolean().openapi({ example: true }),
+    data: z.any(),
+  })
+  .openapi('SuccessResponse');
 
-const ErrorResponseSchema = z.object({
-  success: z.boolean().openapi({ example: false }),
-  error: z.string().openapi({ example: 'Error message' }),
-}).openapi('ErrorResponse');
+const ErrorResponseSchema = z
+  .object({
+    success: z.boolean().openapi({ example: false }),
+    error: z.string().openapi({ example: 'Error message' }),
+  })
+  .openapi('ErrorResponse');
 
 const RegisterRequestSchema = z.object({
-  email: z.string().email().openapi({ 
+  email: z.string().email().openapi({
     example: 'user@example.com',
-    description: 'Valid email address' 
+    description: 'Valid email address',
   }),
-  password: z.string().min(8).openapi({ 
+  password: z.string().min(8).openapi({
     example: 'SecurePass123',
-    description: 'Password must be at least 8 characters with uppercase, lowercase, and number' 
+    description: 'Password must be at least 8 characters with uppercase, lowercase, and number',
   }),
-  role: z.enum(['admin', 'user', 'readonly']).optional().openapi({ 
+  role: z.enum(['admin', 'user', 'readonly']).optional().openapi({
     example: 'user',
-    description: 'User role (default: user)' 
+    description: 'User role (default: user)',
   }),
 });
 
 const LoginRequestSchema = z.object({
-  email: z.string().email().openapi({ 
-    example: 'user@example.com' 
+  email: z.string().email().openapi({
+    example: 'user@example.com',
   }),
-  password: z.string().openapi({ 
-    example: 'SecurePass123' 
+  password: z.string().openapi({
+    example: 'SecurePass123',
   }),
 });
 
