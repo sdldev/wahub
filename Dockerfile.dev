@@ -1,5 +1,5 @@
 # Development Dockerfile dengan hot reload
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Install dumb-init
 RUN apk add --no-cache dumb-init

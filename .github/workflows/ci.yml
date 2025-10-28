@@ -1,4 +1,4 @@
-name: CI with Bun
+name: CI Pipeline (Monorepo)
 on:
   push:
     branches: [main]
@@ -10,46 +10,96 @@ permissions:
   pull-requests: read
 
 jobs:
-  ci:
+  backend:
+    name: Backend Tests
     runs-on: self-hosted
-
-    strategy:
-      matrix:
-        bun-version: [latest, canary]
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Bun ${{ matrix.bun-version }}
+      - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: ${{ matrix.bun-version }}
+          bun-version: latest
 
-      - name: Verify Bun installation
-        run: |
-          bun --version
-          bun pm --version
-
-      - name: Install dependencies
+      - name: Install backend dependencies
+        working-directory: ./backend
         run: bun install --frozen-lockfile
 
-      - name: Type checking
+      - name: Type check backend
+        working-directory: ./backend
         run: bun run type-check
 
-      - name: Lint code
-        run: bun run lint:fix
+      - name: Lint backend
+        working-directory: ./backend
+        run: bun run lint:check
 
-      - name: Format check
-        run: bun run format
+      - name: Format check backend
+        working-directory: ./backend
+        run: bun run format:check
 
-      - name: Run tests
-        run: bun run test
+      - name: Test backend
+        working-directory: ./backend
+        run: bun test
 
-      - name: Build application
+      - name: Build backend
+        working-directory: ./backend
         run: bun run build
 
-      - name: Verify build output
-        run: |
-          ls -la dist/
-          echo "Build completed successfully"
+  frontend:
+    name: Frontend Tests
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: bun install --frozen-lockfile
+
+      - name: Type check frontend
+        working-directory: ./frontend
+        run: bun run type-check
+
+      - name: Lint frontend
+        working-directory: ./frontend
+        run: bun run lint:check
+
+      - name: Format check frontend
+        working-directory: ./frontend
+        run: bun run format:check
+
+      - name: Test frontend
+        working-directory: ./frontend
+        run: bun run test
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: bun run build
+
+  integration:
+    name: Integration Tests
+    runs-on: self-hosted
+    needs: [backend, frontend]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      # - name: Setup Docker
+      #   uses: docker/setup-buildx-action@v3
+        
+      # - name: Build Docker image
+      #   run: docker build -t wahub:test .
+        
+      # - name: Test Docker build
+      #   run: |
+      #     echo "Docker build completed successfully"
+      #     docker images wahub:test

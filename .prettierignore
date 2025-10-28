@@ -1,9 +1,0 @@
-node_modules/
-dist/
-*.js
-*.d.ts
-wa_credentials/
-*.log
-package-lock.json
-pnpm-lock.yaml
-bun.lockb

@@ -1,624 +1,319 @@
-# WhatsApp Multi-Session Gateway (Node.js)
+# WhatsApp Multi-Session Gateway - Fullstack Application
 
-Sebuah gateway WhatsApp headless yang powerful, ringan, dan mudah di-deploy menggunakan Node.js. Mendukung multiple sessions, multi-device login, dan berbagai jenis pesan termasuk teks, gambar, dan dokumen.
+Aplikasi fullstack yang powerful untuk mengelola multiple WhatsApp sessions dengan REST API backend dan modern web dashboard.
 
-## 📋 Table of Contents
-- [Fitur Utama](#-fitur-utama)
-- [Panduan Instalasi](#-panduan-instalasi)
-- [Konfigurasi](#️-konfigurasi)
-- [Menjalankan Server](#-menjalankan-server)
-- [QR Code Setup](#-qr-code-setup)
-- [API Endpoints](#-api-endpoints)
-- [Fitur Anti-Ban](#️-fitur-anti-ban)
-- [Tips Penggunaan](#-tips-penggunaan)
-- [Troubleshooting](#-troubleshooting)
+> **📦 Struktur Fullstack**: Backend (Node.js) + Frontend (React) + Dokumentasi lengkap
 
-## 🚀 Fitur Utama
+---
 
-### Core Features
-- ✅ **Multi-Device Support** - Mendukung WhatsApp Multi-Device
-- ✅ **Multi-Session Ready** - Kelola beberapa akun WhatsApp sekaligus
-- ✅ **REST API** - Integrasi mudah dengan aplikasi lain
-- ✅ **Built-in Webhook** - Notifikasi real-time untuk pesan masuk
+## 🏗️ Struktur Proyek
 
-### Message Types
-- ✅ **Text Messages** - Kirim pesan teks biasa
-- ✅ **Image Messages** - Kirim gambar dengan caption
-- ✅ **Document Files** - Kirim berbagai jenis dokumen
-- ✅ **Sticker Messages** - Kirim sticker WhatsApp
-
-### Anti-Ban Protection
-- ✅ **Message Queue System** - Antrian pesan dengan rate limiting
-- ✅ **Anti-Spam Protection** - Perlindungan dari banned
-- ✅ **Typing Indicator** - Simulasi "sedang mengetik"
-- ✅ **Random Delay** - Delay acak untuk simulasi manusia
-- ✅ **Retry Mechanism** - Retry otomatis untuk pesan gagal
-- ✅ **Queue Monitoring** - Status tracking dan monitoring
-
-### Phase 2: Foundation & Security ✅ **COMPLETED**
-- ✅ **Multi-User Support** - User management dengan role-based access
-- ✅ **JWT Authentication** - Secure token-based authentication
-- ✅ **MySQL Database** - Production-ready database untuk 1,000,000+ pesan/hari
-- ✅ **Migration System** - Drizzle ORM untuk database management
-- ✅ **Seed Data** - Dummy data untuk development dan testing
-- ✅ **Message History** - Complete message history tracking
-- ✅ **Structured Logging** - Winston logger dengan file rotation
-- ✅ **Data Encryption** - Enkripsi untuk data sensitif
-- ✅ **API Key per User** - Setiap user memiliki API key sendiri
-
-### Phase 3: Session Management ✅ **NEW**
-- ✅ **Session Deduplication** - Prevent multiple sessions untuk nomor yang sama
-- ✅ **Auto Phone Detection** - Deteksi otomatis nomor dari WhatsApp connection
-- ✅ **Session Monitoring** - Real-time status tracking dan health monitoring
-- ✅ **Session Cleanup** - Auto cleanup untuk inactive sessions
-- ✅ **Phone Validation** - Validasi dan normalisasi nomor telepon
-- ✅ **Enhanced API** - 4 endpoint baru untuk session management
-
-> 📖 **Dokumentasi Phase 2**: [PHASE2-IMPLEMENTATION.md](PHASE2-IMPLEMENTATION.md)
-> 📖 **Dokumentasi Phase 3**: [PHASE3-IMPLEMENTATION.md](PHASE3-IMPLEMENTATION.md) | [Quick Summary](PHASE3-SUMMARY.md)
-> 🔄 **MySQL Setup Guide**: [MYSQL-MIGRATION.md](MYSQL-MIGRATION.md) *(MySQL is required)*
-> 📦 **Database Migrations**: [drizzle/README.md](drizzle/README.md)
-
-## 📦 Panduan Instalasi
-
-### 🐳 Instalasi dengan Docker (Recommended)
-```bash
-# Clone repository
-git clone https://github.com/Pramtoxz/wa_gateway.git
-cd wa_gateway
-
-# Setup environment
-cp .env.docker .env
-nano .env  # Edit sesuai kebutuhan
-
-# Start dengan Docker
-chmod +x docker-manager.sh
-./docker-manager.sh start
 ```
-> 📖 **Dokumentasi lengkap Docker**: [DOCKER.md](DOCKER.md)
-
-### 📋 Instalasi Manual
-
-#### 1. Clone Repository
-```bash
-git clone https://github.com/Pramtoxz/wa_gateway.git
-cd wa_gateway
-```
-
-#### 2. Install Dependencies
-```bash
-npm install
-# or with Bun (recommended)
-bun install
-```
-
-#### 3. Setup MySQL Database
-```bash
-# Connect to MySQL as root
-mysql -u root -p
-
-# Create database and user
-CREATE DATABASE wahub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'wahub_user'@'localhost' IDENTIFIED BY 'your_secure_password';
-GRANT ALL PRIVILEGES ON wahub.* TO 'wahub_user'@'localhost';
-FLUSH PRIVILEGES;
-EXIT;
-```
-
-> 📖 **Detailed MySQL Setup**: See [MYSQL-MIGRATION.md](MYSQL-MIGRATION.md)
-
-#### 4. Configure Environment
-```bash
-cp .env.example .env
-nano .env  # Edit with your MySQL credentials
-```
-
-#### 5. Run Migrations and Seed Data
-```bash
-# Apply database migrations
-npm run db:migrate
-
-# Seed with test data (development only)
-npm run db:seed
-```
-
-#### 6. Run Tests (Optional)
-```bash
-bun test
-```
-
-## ⚙️ Konfigurasi
-
-### Setup Environment Variables
-Copy file `.env.example` menjadi `.env` dan sesuaikan konfigurasi:
-```bash
-cp .env.example .env
-```
-
-Edit file `.env`:
-```env
-# Server Configuration
-NODE_ENV=DEVELOPMENT
-PORT=5001
-KEY=your-secret-api-key
-
-# MySQL Database Configuration (Required)
-DB_TYPE=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=wahub_user
-DB_PASSWORD=your_secure_password
-DB_NAME=wahub
-
-# JWT & Security Configuration
-JWT_SECRET=your-jwt-secret-change-in-production
-JWT_EXPIRES_IN=7d
-ENCRYPTION_KEY=your-encryption-key-change-in-production
-
-# Webhook (Optional)
-WEBHOOK_BASE_URL=https://your-webhook-url.com
-
-# Rate Limiting Configuration (Anti-Ban)
-MESSAGE_DELAY_MIN=3000           # Delay minimum (ms)
-MESSAGE_DELAY_MAX=7000           # Delay maksimum (ms)
-MAX_MESSAGES_PER_MINUTE=20       # Limit pesan per menit
-MAX_MESSAGES_PER_HOUR=500        # Limit pesan per jam
-MAX_MESSAGES_PER_RECIPIENT=10    # Limit per penerima per jam
-MAX_RETRY_ATTEMPTS=3             # Jumlah retry jika gagal
-```
-
-### Penjelasan Konfigurasi
-| Variable | Deskripsi | Default | Recommended |
-|----------|-----------|---------|-------------|
-| `NODE_ENV` | Environment mode | DEVELOPMENT | PRODUCTION untuk live |
-| `PORT` | Port server | 5001 | Sesuai kebutuhan |
-| `KEY` | API Key untuk autentikasi | - | String acak yang kuat |
-| `DB_TYPE` | Database type | mysql | mysql (required) |
-| `DB_HOST` | MySQL host | localhost | IP/hostname MySQL |
-| `DB_USER` | MySQL user | wahub_user | Database username |
-| `DB_PASSWORD` | MySQL password | - | Strong password |
-| `DB_NAME` | Database name | wahub | Database name |
-| `JWT_SECRET` | JWT secret key | - | 64-char random string |
-| `ENCRYPTION_KEY` | Encryption key | - | 64-char random string |
-| `MESSAGE_DELAY_MIN` | Delay minimum antar pesan | 3000ms | 3000-5000ms |
-| `MESSAGE_DELAY_MAX` | Delay maksimum antar pesan | 7000ms | 7000-10000ms |
-| `MAX_MESSAGES_PER_MINUTE` | Limit pesan per menit | 20 | 10-30 |
-| `MAX_MESSAGES_PER_HOUR` | Limit pesan per jam | 500 | 300-1000 |
-
-> 🔐 **Generate Secure Keys**: Use `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` to generate JWT_SECRET and ENCRYPTION_KEY
-
-## 🏃 Menjalankan Server
-
-### 🐳 Dengan Docker (Recommended)
-```bash
-# Production mode
-./docker-manager.sh start
-
-# Development mode (dengan hot reload)
-./docker-manager.sh dev
-
-# Lihat logs
-./docker-manager.sh logs
-
-# Stop server
-./docker-manager.sh stop
-```
-
-### 📋 Manual Mode
-
-#### Development Mode
-```bash
-bun run dev
-```
-
-#### Production Mode
-```bash
-bun run start
-
-# Atau menggunakan PM2
-pm2 start ecosystem.config.js
-```
-
-### 🧪 Testing
-```bash
-# Run all tests
-bun test
-
-# Run tests in watch mode
-bun test --watch
-
-# Run specific test file
-bun test src/app.test.ts
-```
-
-Server akan berjalan di: `http://localhost:5001`
-
-## 📱 QR Code Setup
-
-### Method 1: Browser (Mudah)
-Buka browser dan akses:
-```
-http://localhost:5001/session/start?session=mysession
-```
-
-### Method 2: API Endpoint (untuk Postman)
-
-#### QR Code sebagai JSON:
-```bash
-GET http://localhost:5001/session/qr/mysession
-Headers: x-api-key: your-api-key
-
-Response:
-{
-  "success": true,
-  "qr": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
-}
-```
-
-#### QR Code sebagai Gambar (PNG) - **RECOMMENDED untuk Postman**:
-```bash
-GET http://localhost:5001/session/qr-image/mysession
-Headers: x-api-key: your-api-key
-
-Response: image/png (QR Code langsung sebagai gambar)
-```
-
-> **💡 Tip untuk Postman**: Gunakan endpoint `/session/qr-image/` karena akan menampilkan QR code langsung sebagai gambar di tab **Preview** Postman. Sangat mudah untuk di-scan!
-
-### Method 3: POST Request
-```bash
-POST http://localhost:5001/session/qr-image
-Headers: 
-  x-api-key: your-api-key
-  Content-Type: application/json
-Body:
-{
-  "sessionId": "mysession"
-}
-```
-
-### Langkah-langkah Scan QR:
-1. Buka WhatsApp di HP → Titik 3 → Perangkat Tertaut
-2. Tap "Tautkan Perangkat"
-3. Scan QR code yang muncul
-4. Tunggu hingga status berubah menjadi "connected"
-
-## 🔌 API Endpoints
-
-### Authentication
-Semua API endpoint memerlukan header `x-api-key` dengan nilai sesuai `KEY` di file `.env`.
-
-### 📱 Session Management
-
-#### Create/Start Session
-```bash
-POST /session/create
-Headers: x-api-key: your-api-key
-Body: {
-  "sessionId": "mysession"
-}
-```
-
-#### Get All Sessions
-```bash
-GET /session
-Headers: x-api-key: your-api-key
-```
-
-#### Get QR Code (JSON)
-```bash
-GET /session/qr/:sessionId
-Headers: x-api-key: your-api-key
-```
-
-#### Get QR Code (Image)
-```bash
-GET /session/qr-image/:sessionId
-Headers: x-api-key: your-api-key
-Response: image/png
-```
-
-#### Logout Session
-```bash
-POST /session/logout
-Headers: x-api-key: your-api-key
-Body: {
-  "sessionId": "mysession"
-}
-```
-
-#### Check Phone Number Availability (Phase 3 ✅)
-```bash
-POST /session/check-phone
-Headers: 
-  x-api-key: your-api-key
-  Content-Type: application/json
-Body: {
-  "phoneNumber": "6281234567890"
-}
-Response: {
-  "hasActiveSession": false
-}
-```
-
-#### Get Session Status (Phase 3 ✅)
-```bash
-GET /session/status?session=mysession
-Headers: x-api-key: your-api-key
-Response: {
-  "data": {
-    "sessionId": "mysession",
-    "phoneNumber": "6281234567890",
-    "status": "connected",
-    "isConnected": true,
-    "lastUpdated": "2025-10-27T19:00:00.000Z",
-    "createdAt": "2025-10-27T18:00:00.000Z"
-  }
-}
-```
-
-#### List All Sessions (Phase 3 ✅)
-```bash
-GET /session/list
-Headers: x-api-key: your-api-key
-Response: {
-  "data": [
-    {
-      "sessionId": "session1",
-      "phoneNumber": "6281234567890",
-      "status": "connected",
-      "userId": 1,
-      "createdAt": "2025-10-27T18:00:00.000Z",
-      "updatedAt": "2025-10-27T19:00:00.000Z"
-    }
-  ]
-}
-```
-
-#### Cleanup Inactive Sessions (Phase 3 ✅)
-```bash
-POST /session/cleanup?hours=24
-Headers: x-api-key: your-api-key
-Response: {
-  "data": {
-    "message": "Cleaned up 2 inactive sessions",
-    "cleanedCount": 2
-  }
-}
-```
-
-### 💬 Send Messages
-
-#### Send Text Message
-```bash
-POST /message/send-text
-Headers: 
-  x-api-key: your-api-key
-  Content-Type: application/json
-Body: {
-  "session": "mysession",
-  "to": "628123456789",
-  "text": "Hello from WhatsApp Gateway!"
-}
-```
-
-#### Send Image with Caption
-```bash
-POST /message/send-image
-Headers: x-api-key: your-api-key
-Body: {
-  "session": "mysession",
-  "to": "628123456789",
-  "image": "https://example.com/image.jpg",
-  "caption": "Check this image!"
-}
-```
-
-#### Send Document
-```bash
-POST /message/send-document
-Headers: x-api-key: your-api-key
-Body: {
-  "session": "mysession",
-  "to": "628123456789",
-  "document": "https://example.com/file.pdf",
-  "filename": "document.pdf"
-}
-```
-
-### 📊 Queue Management
-
-#### Get Queue Status
-```bash
-GET /message/queue-status?session=mysession
-Headers: x-api-key: your-api-key
-```
-
-#### Clear Queue
-```bash
-POST /message/clear-queue
-Headers: x-api-key: your-api-key
-Body: {
-  "session": "mysession"
-}
-```
-
-### 👤 Profile Management
-
-#### Get Profile Info
-```bash
-POST /profile
-Headers: x-api-key: your-api-key
-Body: {
-  "session": "mysession",
-  "to": "628123456789"
-}
-```
-
-## 🛡️ Fitur Anti-Ban
-
-Sistem ini dilengkapi dengan mekanisme anti-spam untuk meminimalisir risiko banned:
-
-### 🚦 Rate Limiting System
-- **Per Minute**: Maksimal 20 pesan per menit (configurable)
-- **Per Hour**: Maksimal 500 pesan per jam (configurable)  
-- **Per Recipient**: Maksimal 10 pesan per penerima per jam
-- **Queue System**: Pesan diproses secara berurutan dengan delay
-
-### ⏱️ Smart Delay Management
-- **Random Delay**: 3-7 detik antar pesan (configurable)
-- **Typing Indicator**: Simulasi "sedang mengetik" sebelum kirim
-- **Human-like Behavior**: Meniru perilaku pengguna normal
-
-### 🔄 Retry & Recovery
-- **Auto Retry**: Retry otomatis hingga 3x untuk pesan gagal
-- **Queue Recovery**: Queue otomatis pause/resume saat disconnect
-- **Error Handling**: Penanganan error yang robust
-
-## 💡 Tips Penggunaan
-
-### ✅ Best Practices untuk Menghindari Banned
-
-#### ⚙️ Konfigurasi Optimal
-- Gunakan delay 3-7 detik (atau lebih) antar pesan
-- Set limit maksimal 20 pesan per menit untuk akun baru
-- Untuk akun established, bisa dinaikkan hingga 30-50 per menit
-- Jangan kirim lebih dari 1000 pesan per hari
-
-#### 📱 Pemilihan Nomor
-- Gunakan nomor bisnis resmi jika memungkinkan
-- Verifikasi nomor dengan foto KTP untuk akun bisnis
-- Hindari nomor yang baru saja dibuat
-- Warming up akun baru dengan aktivitas normal selama beberapa hari
-
-#### 📝 Content Guidelines
-- Hindari konten spam atau promosi berlebihan
-- Gunakan template pesan yang bervariasi
-- Pastikan penerima sudah opt-in menerima pesan
-- Sertakan opsi unsubscribe dalam pesan broadcast
-
-#### 🎯 Target Audience
-- Kirim pesan hanya ke nomor yang aktif
-- Jangan spam ke nomor yang sama berulang kali
-- Bersihkan database dari nomor yang tidak merespon
-- Segmentasi audience berdasarkan engagement
-
-### 🔧 Production Setup
-
-#### PM2 Configuration
-Buat file `ecosystem.config.js`:
-```javascript
-module.exports = {
-  apps: [{
-    name: 'wa-gateway',
-    script: 'dist/index.js',
-    instances: 1,
-    autorestart: true,
-    watch: false,
-    max_memory_restart: '1G',
-    env: {
-      NODE_ENV: 'production'
-    }
-  }]
-}
-```
-
-#### SSL Setup (Nginx)
-```nginx
-server {
-    listen 443 ssl;
-    server_name your-domain.com;
-    
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
-    
-    location / {
-        proxy_pass http://localhost:5001;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-## 🐛 Troubleshooting
-
-### ❌ Common Issues
-
-#### WebSocket Warnings with Bun
-Jika menggunakan Bun sebagai runtime, Anda mungkin melihat warning seperti:
-```
-[bun] Warning: ws.WebSocket 'upgrade' event is not implemented in bun
-[bun] Warning: ws.WebSocket 'unexpected-response' event is not implemented in bun
-```
-
-**Solusi**: Warning ini tidak berbahaya dan tidak mempengaruhi fungsionalitas aplikasi. Mereka sudah di-suppress secara otomatis saat menjalankan `bun run dev` atau `bun run start`.
-
-#### QR Code Tidak Muncul
-```bash
-# Check apakah session sudah dibuat
-GET /session
-
-# Restart session jika perlu
-POST /session/logout
-POST /session/create
-```
-
-#### Pesan Tidak Terkirim
-```bash
-# Check status queue
-GET /message/queue-status?session=mysession
-
-# Check apakah session masih connected
-GET /session
-```
-
-#### Rate Limit Exceeded
-- Kurangi `MAX_MESSAGES_PER_MINUTE` di `.env`
-- Tambah `MESSAGE_DELAY_MIN` dan `MESSAGE_DELAY_MAX`
-- Tunggu beberapa menit sebelum kirim lagi
-
-#### Session Sering Disconnect
-- Pastikan koneksi internet stabil
-- Jangan login di device lain secara bersamaan
-- Restart server jika perlu
-
-### 📋 Error Codes
-
-| Code | Deskripsi | Solusi |
-|------|-----------|--------|
-| 401 | Unauthorized | Check API key di header `x-api-key` |
-| 404 | Session not found | Buat session baru dengan `/session/create` |
-| 429 | Rate limit exceeded | Tunggu atau kurangi rate limit |
-| 500 | Internal server error | Check logs server |
-
-### 📊 Monitoring
-
-#### Log Files Location
-```bash
-# Development
-tail -f logs/app.log
-
-# PM2 Production
-pm2 logs wa-gateway
-```
-
-#### Health Check Endpoint
-```bash
-GET /health
-Response: {"status": "ok", "timestamp": "2025-10-27T02:45:00.000Z"}
+wahub/
+├── backend/          # REST API Server (Node.js + TypeScript)
+│   ├── src/         # Source code backend
+│   ├── drizzle/     # Database migrations
+│   └── ...
+├── frontend/         # Web Dashboard (React + TypeScript)
+│   ├── src/         # Source code frontend
+│   └── ...
+├── docs/            # Dokumentasi lengkap
+│   ├── PHASE1-IMPLEMENTATION.md
+│   ├── PHASE2-IMPLEMENTATION.md
+│   ├── PHASE3-IMPLEMENTATION.md
+│   ├── PHASE4-IMPLEMENTATION.md
+│   ├── MYSQL-MIGRATION.md
+│   └── TO-DO.md
+└── docker-compose.yml  # Docker orchestration
 ```
 
 ---
 
+## 🚀 Quick Start
+
+### 🐳 Docker (Recommended)
+
+```bash
+# Clone repository
+git clone https://github.com/sdldev/wahub.git
+cd wahub
+
+# Start seluruh stack (Backend + Frontend + Database)
+docker-compose up -d
+
+# Check logs
+docker-compose logs -f
+```
+
+**Akses aplikasi:**
+- 🖥️ **Frontend Dashboard**: http://localhost:3000
+- 🔌 **Backend API**: http://localhost:5001
+- 📊 **API Documentation**: http://localhost:5001/api/docs
+
+### 📋 Manual Installation
+
+#### 1. Setup Backend
+
+```bash
+cd backend
+
+# Install dependencies
+npm install
+
+# Setup database
+cp .env.example .env
+# Edit .env dengan MySQL credentials
+
+# Run migrations
+npm run db:migrate
+npm run db:seed
+
+# Start backend server
+npm run dev
+```
+
+**Backend akan berjalan di**: `http://localhost:5001`
+
+> 📖 **Backend README**: [backend/README.md](backend/README.md)
+
+#### 2. Setup Frontend
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Setup environment
+cp .env.example .env
+# Edit .env (VITE_API_URL=http://localhost:5001)
+
+# Start frontend dev server
+npm run dev
+```
+
+**Frontend akan berjalan di**: `http://localhost:5173`
+
+> 📖 **Frontend README**: [frontend/README.md](frontend/README.md)
+
+---
+
+## 🎯 Fitur Utama
+
+### Backend API
+
+- ✅ **Multi-Session Management** - Kelola multiple WhatsApp accounts
+- ✅ **REST API** - Complete API endpoints untuk integrasi
+- ✅ **JWT Authentication** - Secure authentication system
+- ✅ **MySQL Database** - Production-ready database
+- ✅ **Message Queue** - Anti-spam dengan rate limiting
+- ✅ **Session Deduplication** - Prevent duplicate sessions
+- ✅ **Auto Phone Detection** - Deteksi otomatis nomor WhatsApp
+
+### Frontend Dashboard
+
+- ✅ **Modern UI** - React + TypeScript + Shadcn/UI
+- ✅ **Authentication** - Login/Register interface
+- ✅ **Dashboard Overview** - Real-time statistics
+- ✅ **Session Management** - Visual interface untuk sessions
+- ✅ **Message Composer** - Send messages dengan UI
+- ✅ **Responsive Design** - Mobile-friendly interface
+
+---
+
+## 📚 Dokumentasi
+
+### Implementasi Phases
+
+| Phase | Deskripsi | Status | Dokumentasi |
+|-------|-----------|--------|-------------|
+| **Phase 1** | Message Queue & Rate Limiting | ✅ Completed | [docs/PHASE1-IMPLEMENTATION.md](docs/PHASE1-IMPLEMENTATION.md) |
+| **Phase 2** | Database & Authentication | ✅ Completed | [docs/PHASE2-IMPLEMENTATION.md](docs/PHASE2-IMPLEMENTATION.md) |
+| **Phase 3** | Session Management | ✅ Completed | [docs/PHASE3-IMPLEMENTATION.md](docs/PHASE3-IMPLEMENTATION.md) |
+| **Phase 4** | Frontend Dashboard | ✅ Completed | [docs/PHASE4-IMPLEMENTATION.md](docs/PHASE4-IMPLEMENTATION.md) |
+
+### Panduan Setup
+
+- 🔄 **MySQL Setup**: [docs/MYSQL-MIGRATION.md](docs/MYSQL-MIGRATION.md)
+- 🐳 **Docker Setup**: [docs/DOCKER.md](docs/DOCKER.md)
+- 📋 **Development Roadmap**: [docs/TO-DO.md](docs/TO-DO.md)
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Runtime**: Node.js + TypeScript
+- **Framework**: Hono.js
+- **Database**: MySQL + Drizzle ORM
+- **Authentication**: JWT + bcrypt
+- **Queue**: Message queue dengan rate limiting
+- **Logging**: Winston
+
+### Frontend
+- **Framework**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **UI Library**: Shadcn/UI + Tailwind CSS
+- **Routing**: React Router v6
+- **State**: TanStack Query + Zustand
+- **HTTP Client**: Axios
+
+### DevOps
+- **Containerization**: Docker + Docker Compose
+- **Reverse Proxy**: Nginx
+- **Process Manager**: PM2
+
+---
+
+## 🔌 API Endpoints
+
+### Authentication
+```bash
+POST /auth/login      # Login
+POST /auth/register   # Register
+GET  /auth/me         # Get current user
+```
+
+### Session Management
+```bash
+POST   /session/create     # Create new session
+GET    /session/list       # List all sessions
+GET    /session/status     # Get session status
+GET    /session/qr/:id     # Get QR code
+POST   /session/logout     # Logout session
+POST   /session/check-phone # Check phone availability
+POST   /session/cleanup    # Cleanup inactive sessions
+```
+
+### Messages
+```bash
+POST /message/send-text     # Send text message
+POST /message/send-image    # Send image
+POST /message/send-document # Send document
+GET  /message/queue-status  # Get queue status
+POST /message/clear-queue   # Clear queue
+```
+
+> 📖 **Complete API Documentation**: See [backend/README.md](backend/README.md)
+
+---
+
+## 🏃 Development
+
+### Backend Development
+
+```bash
+cd backend
+npm run dev          # Start dengan hot reload
+npm run build        # Build untuk production
+npm run test         # Run tests
+npm run lint         # Lint code
+```
+
+### Frontend Development
+
+```bash
+cd frontend
+npm run dev          # Start dev server
+npm run build        # Build untuk production
+npm run preview      # Preview production build
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Backend tidak bisa connect ke database:**
+- Check MySQL service: `systemctl status mysql`
+- Verify credentials di `backend/.env`
+- Run migrations: `cd backend && npm run db:migrate`
+
+**Frontend tidak bisa connect ke backend:**
+- Pastikan backend running di port 5001
+- Check `frontend/.env` VITE_API_URL
+- Verify CORS settings di backend
+
+**QR Code tidak muncul:**
+- Check session status via API
+- Restart session jika diperlukan
+- Verify WhatsApp connection
+
+---
+
+## 📦 Production Deployment
+
+### Docker Production
+
+```bash
+# Build dan start production
+docker-compose -f docker-compose.prod.yml up -d
+
+# Check logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+```
+
+### Manual Production
+
+**Backend:**
+```bash
+cd backend
+npm run build
+pm2 start ecosystem.config.js
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm run build
+# Deploy dist/ ke static hosting (Nginx/Vercel/Netlify)
+```
+
+---
+
+## 🔒 Security
+
+- ✅ JWT authentication untuk API
+- ✅ bcrypt password hashing
+- ✅ API key per user
+- ✅ Rate limiting untuk prevent spam
+- ✅ Input validation
+- ✅ SQL injection prevention (Drizzle ORM)
+- ✅ CORS configuration
+
+---
+
 ## 📄 License
+
 MIT License - feel free to use this project for personal or commercial purposes.
 
+---
+
 ## 🤝 Contributing
-Pull requests are welcome! Please read our contributing guidelines first.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
 
 ## 💬 Support
-- Create an issue on GitHub
-- Join our Telegram group: [Link]
-- Email: support@example.com
+
+- 📧 **Email**: support@wahub.com
+- 💬 **Telegram**: [Join our group](https://t.me/wahub)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/sdldev/wahub/issues)
+
+---
+
+## 👥 Team
+
+Developed with ❤️ by the WaHub Team
+
+- **Backend**: Node.js + TypeScript
+- **Frontend**: React + TypeScript  
+- **Database**: MySQL + Drizzle ORM
+- **UI**: Shadcn/UI + Tailwind CSS

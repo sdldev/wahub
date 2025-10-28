@@ -1,56 +1,54 @@
 # Multi-stage build untuk optimasi size
-FROM node:18-alpine AS builder
+FROM oven/bun:1.1.34-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache python3 make g++ libstdc++
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
-
-# Install pnpm
-RUN npm install -g pnpm
+# Copy package files dari backend
+COPY backend/package*.json ./
+COPY backend/bun.lockb* ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
-# Copy source code dan build
-COPY . .
-RUN pnpm run build
+# Copy source code backend dan build
+COPY backend/ .
+
+# Build with Bun
+RUN bun run build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM oven/bun:1.1.34-alpine AS production
 
-# Install dumb-init untuk proper signal handling
-RUN apk add --no-cache dumb-init
+# Install runtime dependencies
+RUN apk add --no-cache dumb-init libstdc++
 
 # Create app user
 RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+RUN adduser -S nodejs -u 1001
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
+COPY backend/package*.json ./
 
-# Install pnpm
-RUN npm install -g pnpm
-
-# Install only production dependencies
-RUN pnpm install --frozen-lockfile --production
+# Install production dependencies  
+RUN bun install --frozen-lockfile --production
 
 # Copy built application dari builder stage
-COPY --from=builder --chown=nextjs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 
 # Create directories untuk persistent data
 RUN mkdir -p /app/wa_credentials /app/media /app/logs
-RUN chown -R nextjs:nodejs /app/wa_credentials /app/media /app/logs
+RUN chown -R nodejs:nodejs /app/wa_credentials /app/media /app/logs
 
 # Switch to non-root user
-USER nextjs
+USER nodejs
 
 # Expose port
 EXPOSE 5001
