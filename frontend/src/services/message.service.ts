@@ -9,15 +9,18 @@ export interface SendTextMessageRequest {
 export interface SendImageMessageRequest {
   session: string;
   to: string;
-  image: string;
-  caption?: string;
+  text: string;
+  image_url: string;
+  is_group?: boolean;
 }
 
 export interface SendDocumentMessageRequest {
   session: string;
   to: string;
-  document: string;
-  filename?: string;
+  text: string;
+  document_url: string;
+  document_name: string;
+  is_group?: boolean;
 }
 
 export interface Message {
@@ -36,11 +39,19 @@ export interface Message {
 
 export interface QueueStatus {
   session: string;
-  pending: number;
-  processing: number;
-  completed: number;
-  failed: number;
-  isProcessing: boolean;
+  stats: {
+    pending: number;
+    processing: number;
+    completed: number;
+    failed: number;
+  };
+  queue: Array<{
+    messageId: string;
+    to: string;
+    type: string;
+    status: string;
+    createdAt: string;
+  }>;
 }
 
 export const messageService = {
@@ -68,23 +79,20 @@ export const messageService = {
     return response.data;
   },
 
+  // Send sticker
+  sendSticker: async (data: {
+    session: string;
+    to: string;
+    image_url: string;
+    is_group?: boolean;
+  }): Promise<{ success: boolean; message: string }> => {
+    const response = await api.post('/message/send-sticker', data);
+    return response.data;
+  },
+
   // Get queue status
   getQueueStatus: async (session: string): Promise<QueueStatus> => {
     const response = await api.get(`/message/queue-status?session=${session}`);
     return response.data;
-  },
-
-  // Clear queue
-  clearQueue: async (session: string): Promise<{ success: boolean; message: string }> => {
-    const response = await api.post('/message/clear-queue', { session });
-    return response.data;
-  },
-
-  // Get message history (placeholder - would need backend endpoint)
-  getMessageHistory: async (session?: string): Promise<Message[]> => {
-    // TODO: Implement when backend endpoint is available
-    const params = session ? `?session=${session}` : '';
-    const response = await api.get(`/message/history${params}`);
-    return response.data.data || [];
   },
 };
