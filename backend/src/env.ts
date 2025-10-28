@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const env = z
   .object({
-    NODE_ENV: z.enum(['DEVELOPMENT', 'PRODUCTION']).default('DEVELOPMENT'),
+    NODE_ENV: z.enum(['DEVELOPMENT', 'PRODUCTION', 'test']).default('DEVELOPMENT'),
     PORT: z
       .string()
       .default('5001')
