@@ -48,7 +48,9 @@ docker-compose logs -f
 **Akses aplikasi:**
 - 🖥️ **Frontend Dashboard**: http://localhost:3000
 - 🔌 **Backend API**: http://localhost:5001
-- 📊 **API Documentation**: http://localhost:5001/api/docs
+- 📊 **API Documentation (Swagger UI)**: http://localhost:5001/api-docs/ui
+- 📖 **API Reference**: [backend/API-REFERENCE.md](backend/API-REFERENCE.md)
+- 🚀 **Frontend Integration Guide**: [FRONTEND-INTEGRATION.md](FRONTEND-INTEGRATION.md)
 
 ### 📋 Manual Installation
 
@@ -194,7 +196,11 @@ GET  /message/queue-status  # Get queue status
 POST /message/clear-queue   # Clear queue
 ```
 
-> 📖 **Complete API Documentation**: See [backend/README.md](backend/README.md)
+> 📖 **Complete API Documentation**: 
+> - [Backend README](backend/README.md)
+> - [API Reference Guide](backend/API-REFERENCE.md) - Comprehensive endpoint documentation
+> - [Swagger UI](http://localhost:5001/api-docs/ui) - Interactive API testing
+> - [Frontend Integration Guide](FRONTEND-INTEGRATION.md) - For frontend developers
 
 ---
 

@@ -561,7 +561,349 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
             },
           },
         },
-        '/profile/get': {
+        '/message/send-document': {
+          post: {
+            tags: ['Messages'],
+            summary: 'Send document message',
+            description: 'Send a document file via WhatsApp',
+            security: [{ ApiKeyAuth: [] }],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    required: ['session', 'to', 'document_url', 'document_name'],
+                    properties: {
+                      session: { type: 'string', example: '62812345678' },
+                      to: { type: 'string', example: '6287654321' },
+                      text: { type: 'string', example: 'Document description' },
+                      document_url: {
+                        type: 'string',
+                        format: 'uri',
+                        example: 'https://example.com/document.pdf',
+                      },
+                      document_name: { type: 'string', example: 'document.pdf' },
+                      is_group: { type: 'boolean', example: false },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              '200': {
+                description: 'Document sent successfully',
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/SuccessResponse' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/message/send-sticker': {
+          post: {
+            tags: ['Messages'],
+            summary: 'Send sticker message',
+            description: 'Send a sticker via WhatsApp',
+            security: [{ ApiKeyAuth: [] }],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    required: ['session', 'to', 'image_url'],
+                    properties: {
+                      session: { type: 'string', example: '62812345678' },
+                      to: { type: 'string', example: '6287654321' },
+                      image_url: {
+                        type: 'string',
+                        format: 'uri',
+                        example: 'https://example.com/sticker.webp',
+                      },
+                      is_group: { type: 'boolean', example: false },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              '200': {
+                description: 'Sticker sent successfully',
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/SuccessResponse' },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/message/queue-status': {
+          get: {
+            tags: ['Messages'],
+            summary: 'Get message queue status',
+            description: 'Get message queue status for a session',
+            security: [{ ApiKeyAuth: [] }],
+            parameters: [
+              {
+                name: 'session',
+                in: 'query',
+                required: true,
+                schema: { type: 'string', example: '62812345678' },
+                description: 'WhatsApp session ID',
+              },
+            ],
+            responses: {
+              '200': {
+                description: 'Queue status retrieved successfully',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        session: { type: 'string', example: '62812345678' },
+                        stats: {
+                          type: 'object',
+                          properties: {
+                            pending: { type: 'number', example: 5 },
+                            processing: { type: 'number', example: 1 },
+                            completed: { type: 'number', example: 100 },
+                            failed: { type: 'number', example: 2 },
+                          },
+                        },
+                        queue: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              messageId: { type: 'string', example: 'msg_123' },
+                              to: { type: 'string', example: '6287654321' },
+                              type: { type: 'string', example: 'text' },
+                              status: { type: 'string', example: 'pending' },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/session/start': {
+          post: {
+            tags: ['WhatsApp Sessions'],
+            summary: 'Start new session',
+            description: 'Create and start a new WhatsApp session',
+            security: [{ ApiKeyAuth: [] }],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    required: ['session'],
+                    properties: {
+                      session: {
+                        type: 'string',
+                        example: '62812345678',
+                        description: 'Session ID (phone number without + prefix)',
+                      },
+                      phoneNumber: {
+                        type: 'string',
+                        example: '+62812345678',
+                        description: 'Phone number with country code (optional)',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              '200': {
+                description: 'Session started successfully',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        qr: { type: 'string', description: 'QR code string' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/session/list': {
+          get: {
+            tags: ['WhatsApp Sessions'],
+            summary: 'List all sessions',
+            description: 'Get list of all WhatsApp sessions',
+            security: [{ ApiKeyAuth: [] }],
+            responses: {
+              '200': {
+                description: 'Sessions retrieved successfully',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        data: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              sessionId: { type: 'string', example: '62812345678' },
+                              phoneNumber: { type: 'string', example: '+62812345678' },
+                              status: { type: 'string', example: 'connected' },
+                              userId: { type: 'number', example: 1 },
+                              createdAt: { type: 'string', example: '2025-10-28T01:00:00.000Z' },
+                              updatedAt: { type: 'string', example: '2025-10-28T01:05:00.000Z' },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/session/logout': {
+          post: {
+            tags: ['WhatsApp Sessions'],
+            summary: 'Logout session',
+            description: 'Logout and delete a WhatsApp session',
+            security: [{ ApiKeyAuth: [] }],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    required: ['session'],
+                    properties: {
+                      session: {
+                        type: 'string',
+                        example: '62812345678',
+                        description: 'Session ID to logout',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              '200': {
+                description: 'Session logged out successfully',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        data: { type: 'string', example: 'success' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/session/check-phone': {
+          post: {
+            tags: ['WhatsApp Sessions'],
+            summary: 'Check phone session',
+            description: 'Check if a phone number has an active session',
+            security: [{ ApiKeyAuth: [] }],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    required: ['phoneNumber'],
+                    properties: {
+                      phoneNumber: {
+                        type: 'string',
+                        example: '+62812345678',
+                        description: 'Phone number to check',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              '200': {
+                description: 'Check completed',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        hasActiveSession: { type: 'boolean', example: false },
+                        session: {
+                          type: 'object',
+                          properties: {
+                            sessionId: { type: 'string', example: '62812345678' },
+                            phoneNumber: { type: 'string', example: '+62812345678' },
+                            status: { type: 'string', example: 'connected' },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/session/cleanup': {
+          post: {
+            tags: ['WhatsApp Sessions'],
+            summary: 'Cleanup inactive sessions',
+            description: 'Remove inactive sessions older than specified hours',
+            security: [{ ApiKeyAuth: [] }],
+            parameters: [
+              {
+                name: 'hours',
+                in: 'query',
+                schema: { type: 'number', example: 24 },
+                description: 'Number of hours (default: 24)',
+              },
+            ],
+            responses: {
+              '200': {
+                description: 'Cleanup completed',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        data: {
+                          type: 'object',
+                          properties: {
+                            message: { type: 'string', example: 'Cleaned up 5 inactive sessions' },
+                            cleanedCount: { type: 'number', example: 5 },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/profile': {
           post: {
             tags: ['Profile'],
             summary: 'Get WhatsApp profile',
@@ -576,7 +918,11 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                     required: ['session', 'target'],
                     properties: {
                       session: { type: 'string', example: '62812345678' },
-                      target: { type: 'string', example: '6287654321' },
+                      target: {
+                        type: 'string',
+                        example: '6287654321@s.whatsapp.net',
+                        description: 'Target WhatsApp ID',
+                      },
                     },
                   },
                 },
@@ -590,13 +936,106 @@ Used for: \`/session/*\`, \`/message/*\`, \`/profile/*\`
                     schema: {
                       type: 'object',
                       properties: {
-                        success: { type: 'boolean', example: true },
                         data: {
                           type: 'object',
                           properties: {
                             name: { type: 'string', example: 'John Doe' },
                             about: { type: 'string', example: 'Available' },
                             profilePicUrl: { type: 'string', example: 'https://...' },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/user/profile': {
+          get: {
+            tags: ['User Management'],
+            summary: 'Get user profile',
+            description: 'Get current user profile information',
+            security: [{ BearerAuth: [] }],
+            responses: {
+              '200': {
+                description: 'Profile retrieved successfully',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        success: { type: 'boolean', example: true },
+                        data: { $ref: '#/components/schemas/User' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          put: {
+            tags: ['User Management'],
+            summary: 'Update user profile',
+            description: 'Update current user profile information',
+            security: [{ BearerAuth: [] }],
+            requestBody: {
+              required: true,
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      email: { type: 'string', format: 'email', example: 'newemail@example.com' },
+                      password: { type: 'string', minLength: 8, example: 'NewPassword123' },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              '200': {
+                description: 'Profile updated successfully',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        success: { type: 'boolean', example: true },
+                        data: { $ref: '#/components/schemas/User' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        '/user/accounts': {
+          get: {
+            tags: ['User Management'],
+            summary: 'Get user WhatsApp accounts',
+            description: 'Get WhatsApp accounts for current user',
+            security: [{ BearerAuth: [] }],
+            responses: {
+              '200': {
+                description: 'Accounts retrieved successfully',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        success: { type: 'boolean', example: true },
+                        data: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              sessionId: { type: 'string', example: '62812345678' },
+                              phoneNumber: { type: 'string', example: '+62812345678' },
+                              status: { type: 'string', example: 'connected' },
+                            },
                           },
                         },
                       },

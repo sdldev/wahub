@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const env = z
   .object({
-    NODE_ENV: z.enum(['DEVELOPMENT', 'PRODUCTION']).default('DEVELOPMENT'),
+    NODE_ENV: z.enum(['DEVELOPMENT', 'PRODUCTION', 'test']).default('DEVELOPMENT'),
     PORT: z
       .string()
       .default('5001')
@@ -69,6 +69,10 @@ export const env = z
   )
   .refine(
     (data) => {
+      // Skip database validation in test environment
+      if (data.NODE_ENV === 'test') {
+        return true;
+      }
       if (data.DB_TYPE === 'mysql') {
         if (!data.DB_HOST || !data.DB_USER || !data.DB_PASSWORD) {
           return false;
