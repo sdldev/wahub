@@ -336,10 +336,10 @@ export const createSessionController = () => {
       if (user && user.phone) {
         // Use phone number as session ID
         const sessionId = user.phone;
-        
+
         // Check database for account record first
         const account = await WhatsappAccountService.findBySessionId(sessionId);
-        
+
         if (account) {
           // Account exists in database, return its actual status
           return c.json({
@@ -349,15 +349,16 @@ export const createSessionController = () => {
               phoneNumber: account.phoneNumber || user.phone,
               sessionId: sessionId,
               status: account.status,
-              message: account.status === 'connected' 
-                ? `Connected as ${account.phoneNumber || user.phone}`
-                : account.status === 'connecting'
-                ? 'Connecting to WhatsApp... Please scan the QR code.'
-                : `Not connected. Please scan QR code to connect.`
-            }
+              message:
+                account.status === 'connected'
+                  ? `Connected as ${account.phoneNumber || user.phone}`
+                  : account.status === 'connecting'
+                    ? 'Connecting to WhatsApp... Please scan the QR code.'
+                    : `Not connected. Please scan QR code to connect.`,
+            },
           });
         }
-        
+
         // No database record, check if there's a WhatsApp session (shouldn't happen)
         const waSession = whatsapp.getSession(sessionId);
         if (waSession) {
@@ -370,8 +371,8 @@ export const createSessionController = () => {
               phoneNumber: user.phone,
               sessionId: sessionId,
               status: 'connecting',
-              message: 'Connecting to WhatsApp... Please scan the QR code.'
-            }
+              message: 'Connecting to WhatsApp... Please scan the QR code.',
+            },
           });
         }
       }
@@ -382,7 +383,7 @@ export const createSessionController = () => {
         data: {
           connected: false,
           status: 'disconnected',
-          message: user?.phone 
+          message: user?.phone
             ? `No WhatsApp session found for ${user.phone}. Please connect your WhatsApp.`
             : 'Phone number required. Please update your profile with a valid phone number.',
         },
@@ -416,7 +417,7 @@ export const createSessionController = () => {
 
       // Use phone number as session ID (unique per user)
       const sessionId = user.phone;
-      
+
       // Check if session already exists in WhatsApp
       const isExist = whatsapp.getSession(sessionId);
       if (isExist) {
@@ -436,11 +437,7 @@ export const createSessionController = () => {
         await WhatsappAccountService.updateStatus(sessionId, 'connecting');
       } else {
         // Create database record immediately with "connecting" status
-        await WhatsappAccountService.createAccount(
-          user.id,
-          sessionId,
-          user.phone
-        );
+        await WhatsappAccountService.createAccount(user.id, sessionId, user.phone);
         // Update to connecting status
         await WhatsappAccountService.updateStatus(sessionId, 'connecting');
       }
