@@ -35,7 +35,7 @@ class UserService {
     const token = localStorage.getItem('token');
     return {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...(token && { Authorization: `Bearer ${token}` }),
     };
   }
 
@@ -47,7 +47,7 @@ class UserService {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
@@ -57,7 +57,7 @@ class UserService {
       console.error('Error fetching users:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch users'
+        message: error instanceof Error ? error.message : 'Failed to fetch users',
       };
     }
   }
@@ -70,7 +70,7 @@ class UserService {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
@@ -80,12 +80,14 @@ class UserService {
       console.error('Error fetching user:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch user'
+        message: error instanceof Error ? error.message : 'Failed to fetch user',
       };
     }
   }
 
-  async createUser(userData: CreateUserData): Promise<{ success: boolean; data?: User; message?: string }> {
+  async createUser(
+    userData: CreateUserData
+  ): Promise<{ success: boolean; data?: User; message?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -94,7 +96,7 @@ class UserService {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
@@ -104,12 +106,15 @@ class UserService {
       console.error('Error creating user:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to create user'
+        message: error instanceof Error ? error.message : 'Failed to create user',
       };
     }
   }
 
-  async updateUser(id: number, userData: UpdateUserData): Promise<{ success: boolean; data?: User; message?: string }> {
+  async updateUser(
+    id: number,
+    userData: UpdateUserData
+  ): Promise<{ success: boolean; data?: User; message?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/user/admin/users/${id}`, {
         method: 'PUT',
@@ -118,7 +123,7 @@ class UserService {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
@@ -128,7 +133,7 @@ class UserService {
       console.error('Error updating user:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to update user'
+        message: error instanceof Error ? error.message : 'Failed to update user',
       };
     }
   }
@@ -141,7 +146,7 @@ class UserService {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
@@ -151,24 +156,37 @@ class UserService {
       console.error('Error deleting user:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to delete user'
+        message: error instanceof Error ? error.message : 'Failed to delete user',
       };
     }
   }
 
-  async toggleUserStatus(id: number, isActive: boolean): Promise<{ success: boolean; data?: User; message?: string }> {
+  async toggleUserStatus(
+    id: number,
+    isActive: boolean
+  ): Promise<{ success: boolean; data?: User; message?: string }> {
     return this.updateUser(id, { isActive } as Partial<User>);
   }
 
-  async changeUserRole(id: number, role: 'admin' | 'user' | 'readonly'): Promise<{ success: boolean; data?: User; message?: string }> {
+  async changeUserRole(
+    id: number,
+    role: 'admin' | 'user' | 'readonly'
+  ): Promise<{ success: boolean; data?: User; message?: string }> {
     return this.updateUser(id, { role });
   }
 
-  async changeUserStatus(id: number, status: 'Active' | 'Pending' | 'Disable'): Promise<{ success: boolean; data?: User; message?: string }> {
+  async changeUserStatus(
+    id: number,
+    status: 'Active' | 'Pending' | 'Disable'
+  ): Promise<{ success: boolean; data?: User; message?: string }> {
     return this.updateUser(id, { status });
   }
 
-  async requestAccess(accessData: { email: string; phone: string; note?: string }): Promise<{ success: boolean; message?: string; data?: { id?: number; email?: string } }> {
+  async requestAccess(accessData: {
+    email: string;
+    phone: string;
+    note?: string;
+  }): Promise<{ success: boolean; message?: string; data?: { id?: number; email?: string } }> {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register-access`, {
         method: 'POST',
@@ -179,7 +197,7 @@ class UserService {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || `HTTP error! status: ${response.status}`);
       }
@@ -189,7 +207,7 @@ class UserService {
       console.error('Error requesting access:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to request access'
+        message: error instanceof Error ? error.message : 'Failed to request access',
       };
     }
   }

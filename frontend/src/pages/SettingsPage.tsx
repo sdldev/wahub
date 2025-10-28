@@ -41,18 +41,22 @@ export default function SettingsPage() {
   };
 
   const handleDestroySession = async (session: UserSession) => {
-    if (!confirm(`Are you sure you want to destroy WhatsApp session for ${session.phoneNumber}?\n\nThis will disconnect the user from WhatsApp and remove the session completely.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to destroy WhatsApp session for ${session.phoneNumber}?\n\nThis will disconnect the user from WhatsApp and remove the session completely.`
+      )
+    ) {
       return;
     }
 
     setDestroyLoading(session.sessionId);
     setMessage('');
-    
+
     try {
       const response = await sessionService.destroyUserSession({
         sessionId: session.sessionId,
         phoneNumber: session.phoneNumber,
-        userId: session.userId
+        userId: session.userId,
       });
 
       if (response.success) {
@@ -111,15 +115,9 @@ export default function SettingsPage() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-          <p className="text-muted-foreground">
-            Manage WhatsApp sessions and system settings
-          </p>
+          <p className="text-muted-foreground">Manage WhatsApp sessions and system settings</p>
         </div>
-        <Button 
-          onClick={loadUserSessions} 
-          disabled={isLoading}
-          variant="outline"
-        >
+        <Button onClick={loadUserSessions} disabled={isLoading} variant="outline">
           {isLoading ? 'Loading...' : 'Refresh'}
         </Button>
       </div>
@@ -139,7 +137,8 @@ export default function SettingsPage() {
             WhatsApp Sessions Management
           </CardTitle>
           <CardDescription>
-            View and manage all WhatsApp sessions. You can destroy sessions that are stuck or causing issues.
+            View and manage all WhatsApp sessions. You can destroy sessions that are stuck or
+            causing issues.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -156,8 +155,8 @@ export default function SettingsPage() {
           ) : (
             <div className="space-y-4">
               {userSessions.map((session) => (
-                <div 
-                  key={session.sessionId} 
+                <div
+                  key={session.sessionId}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-4">
@@ -174,14 +173,16 @@ export default function SettingsPage() {
                         <span className="mr-4">Session: {session.sessionId}</span>
                       </div>
                       <div className="text-xs text-gray-400">
-                        <span className={`mr-4 ${getStatusColor(session.status, session.isActive)}`}>
+                        <span
+                          className={`mr-4 ${getStatusColor(session.status, session.isActive)}`}
+                        >
                           Status: {session.status} {session.isActive ? '(Active)' : '(Inactive)'}
                         </span>
                         <span>Updated: {new Date(session.updatedAt).toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
-                  
+
                   <Button
                     variant="destructive"
                     size="sm"
@@ -209,11 +210,10 @@ export default function SettingsPage() {
         <CardContent>
           <div className="text-sm text-gray-600 space-y-2">
             <p>
-              <strong>Destroy Session</strong> will permanently remove the WhatsApp session and disconnect the user.
+              <strong>Destroy Session</strong> will permanently remove the WhatsApp session and
+              disconnect the user.
             </p>
-            <p>
-              Use this feature when:
-            </p>
+            <p>Use this feature when:</p>
             <ul className="list-disc list-inside ml-4 space-y-1">
               <li>A session is stuck and not responding</li>
               <li>A user reports connection issues</li>

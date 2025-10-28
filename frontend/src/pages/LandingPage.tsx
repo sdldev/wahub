@@ -23,31 +23,30 @@ export default function LandingPage() {
 
     try {
       try {
-      // Submit access request to users table
-      const result = await userService.requestAccess({
-        email: formData.email,
-        phone: formData.phone,
-        note: formData.note || 'Access request from landing page'
-      });
-
-      if (result.success) {
-        setIsSubmitted(true);
-        // Reset form
-        setFormData({
-          email: '',
-          phone: '',
-          note: '',
+        // Submit access request to users table
+        const result = await userService.requestAccess({
+          email: formData.email,
+          phone: formData.phone,
+          note: formData.note || 'Access request from landing page',
         });
-      } else {
-        setError(result.message || 'Gagal mengirim permintaan akses');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setError('Terjadi kesalahan saat mengirim permintaan akses');
-    } finally {
-      setIsLoading(false);
-    }
 
+        if (result.success) {
+          setIsSubmitted(true);
+          // Reset form
+          setFormData({
+            email: '',
+            phone: '',
+            note: '',
+          });
+        } else {
+          setError(result.message || 'Gagal mengirim permintaan akses');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        setError('Terjadi kesalahan saat mengirim permintaan akses');
+      } finally {
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error('Error sending access request:', error);
       setError('Terjadi kesalahan jaringan. Silahkan coba lagi.');
@@ -56,9 +55,10 @@ export default function LandingPage() {
     }
   };
 
-  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-  };
+  const handleChange =
+    (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+    };
 
   if (isSubmitted) {
     return (
@@ -70,16 +70,12 @@ export default function LandingPage() {
             </div>
             <CardTitle className="text-2xl text-green-600">Permintaan Terkirim!</CardTitle>
             <CardDescription>
-              Permintaan akses Anda telah berhasil dikirim ke admin. 
-              Kami akan menghubungi Anda segera melalui WhatsApp.
+              Permintaan akses Anda telah berhasil dikirim ke admin. Kami akan menghubungi Anda
+              segera melalui WhatsApp.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button
-              onClick={() => setIsSubmitted(false)}
-              variant="outline"
-              className="w-full"
-            >
+            <Button onClick={() => setIsSubmitted(false)} variant="outline" className="w-full">
               Kirim Permintaan Lain
             </Button>
           </CardContent>
@@ -110,7 +106,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <Button
-                onClick={() => window.location.href = '/login'}
+                onClick={() => (window.location.href = '/login')}
                 variant="outline"
                 size="sm"
                 className="ml-4"
@@ -129,15 +125,15 @@ export default function LandingPage() {
             <Shield className="h-4 w-4" />
             WhatsApp Gateway Privat
           </div>
-          
+
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
             WhatsApp Gateway
             <span className="block text-blue-600">Khusus Kalangan Sendiri</span>
           </h1>
-          
+
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Sistem WhatsApp Gateway pribadi yang aman dan terpercaya. 
-            Akses terbatas hanya untuk kalangan tertentu dengan persetujuan admin.
+            Sistem WhatsApp Gateway pribadi yang aman dan terpercaya. Akses terbatas hanya untuk
+            kalangan tertentu dengan persetujuan admin.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-sm text-gray-500">
@@ -198,8 +194,8 @@ export default function LandingPage() {
             <CardHeader className="text-center">
               <CardTitle className="text-2xl text-gray-900">Permintaan Akses</CardTitle>
               <CardDescription className="text-base">
-                Untuk mendapatkan akses, silahkan isi form di bawah ini. 
-                Tim kami akan menghubungi Anda via WhatsApp.
+                Untuk mendapatkan akses, silahkan isi form di bawah ini. Tim kami akan menghubungi
+                Anda via WhatsApp.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -241,8 +237,6 @@ export default function LandingPage() {
                       className="bg-white/80"
                     />
                   </div>
-
-
                 </div>
 
                 <div className="space-y-2">
@@ -260,8 +254,8 @@ export default function LandingPage() {
                   />
                 </div>
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 flex items-center justify-center gap-2"
                   disabled={isLoading}
                 >
@@ -280,8 +274,8 @@ export default function LandingPage() {
 
                 <div className="text-center text-sm text-gray-500">
                   <p>
-                    Dengan mengirim form ini, Anda menyetujui bahwa data akan diproses 
-                    untuk keperluan verifikasi akses.
+                    Dengan mengirim form ini, Anda menyetujui bahwa data akan diproses untuk
+                    keperluan verifikasi akses.
                   </p>
                 </div>
               </form>
@@ -300,7 +294,7 @@ export default function LandingPage() {
                 Sistem private untuk integrasi WhatsApp dengan aplikasi internal.
               </p>
             </div>
-            
+
             <div className="text-center">
               <h4 className="font-semibold text-gray-900 mb-2">Status System</h4>
               <div className="flex items-center justify-center gap-2 text-sm">
@@ -308,17 +302,17 @@ export default function LandingPage() {
                 <span className="text-green-600 font-medium">Operational</span>
               </div>
             </div>
-            
+
             <div className="text-center md:text-right">
               <h4 className="font-semibold text-gray-900 mb-2">Need Help?</h4>
               <p className="text-sm text-gray-600">
-                Contact Admin: 
+                Contact Admin:
                 <br />
                 <span className="font-mono">+62 857-8302-4799</span>
               </p>
             </div>
           </div>
-          
+
           <div className="text-center text-sm text-gray-600 pt-6 border-t border-gray-200">
             <p>&copy; 2025 WhatsApp Gateway Private. All rights reserved.</p>
             <p className="mt-1">Akses terbatas dan dikelola secara privat oleh admin.</p>

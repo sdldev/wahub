@@ -49,7 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Verify token with backend
       const response = await fetch('http://localhost:5001/auth/me', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -74,7 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      
+
       const response = await fetch('http://localhost:5001/auth/login', {
         method: 'POST',
         headers: {
@@ -88,22 +88,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.ok && data.success) {
         // Store token
         localStorage.setItem('token', data.data.token);
-        
+
         // Set user data
         setUser(data.data.user);
-        
+
         return { success: true };
       } else {
-        return { 
-          success: false, 
-          error: data.message || 'Login failed' 
+        return {
+          success: false,
+          error: data.message || 'Login failed',
         };
       }
     } catch (error) {
       console.error('Login error:', error);
-      return { 
-        success: false, 
-        error: 'Network error. Please try again.' 
+      return {
+        success: false,
+        error: 'Network error. Please try again.',
       };
     } finally {
       setIsLoading(false);
@@ -129,9 +129,5 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuth,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
