@@ -44,7 +44,7 @@ describe('API Endpoint Documentation Coverage', () => {
     // List of required message endpoints
     const messageEndpoints = [
       'POST /message/send-text',
-      'GET /message/send-text',  // deprecated but still exists
+      'GET /message/send-text',  // DEPRECATED: Will be removed in v2.0, use POST instead
       'POST /message/send-image',
       'POST /message/send-document',
       'POST /message/send-sticker',

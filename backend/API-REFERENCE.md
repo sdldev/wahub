@@ -514,6 +514,8 @@ All message endpoints require API key authentication and use the message queue s
 
 Send a text message via WhatsApp.
 
+> **Note:** There is also a deprecated `GET /message/send-text` endpoint that will be removed in v2.0. Always use the POST method for new implementations.
+
 **Headers:**
 ```
 x-api-key: <your_api_key>

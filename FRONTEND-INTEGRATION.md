@@ -209,14 +209,24 @@ export async function getSessionStatus(
 }
 
 export async function getQRImage(session: string): Promise<Blob> {
+  const apiKey = localStorage.getItem('apiKey');
+  if (!apiKey) {
+    throw new Error('API key not found. Please login again.');
+  }
+  
   const response = await fetch(
     `${API_BASE_URL}/session/qr-image?session=${session}`,
     {
       headers: {
-        'x-api-key': localStorage.getItem('apiKey') || '',
+        'x-api-key': apiKey,
       },
     }
   );
+  
+  if (!response.ok) {
+    throw new Error('Failed to get QR code image');
+  }
+  
   return response.blob();
 }
 
@@ -343,15 +353,37 @@ export function handleAPIError(error: any): string {
 
 ### Token Storage
 
-✅ **Recommended Approaches:**
-- Use httpOnly cookies for JWT tokens (most secure)
-- Use secure localStorage with encryption
-- Implement token refresh mechanism
+⚠️ **Important Security Considerations:**
 
-❌ **Avoid:**
-- Storing tokens in regular localStorage without encryption
-- Exposing tokens in URL parameters
-- Storing tokens in sessionStorage for long-lived sessions
+The examples in this guide use `localStorage` for simplicity and demonstration purposes. However, for production applications, you should implement more secure token storage:
+
+✅ **Production-Ready Approaches:**
+- **httpOnly Cookies** (most secure - immune to XSS attacks)
+  ```typescript
+  // Backend sets cookie with httpOnly flag
+  // Frontend automatically includes cookie in requests
+  // No direct access to token from JavaScript
+  ```
+- **Encrypted localStorage** with proper key management
+- **Secure session storage** with server-side session validation
+- **Token refresh mechanism** to minimize exposure window
+
+✅ **Development/Prototyping:**
+- Use `localStorage` as shown in examples
+- Implement proper validation and error handling
+- Clear tokens on logout
+
+❌ **Never Do:**
+- Store tokens in URL parameters
+- Expose tokens in console logs
+- Share tokens across domains without proper validation
+- Store sensitive data without encryption
+
+**Migration Path:**
+1. Start with localStorage for development (as shown in examples)
+2. Add encryption layer for staging
+3. Implement httpOnly cookies for production
+4. Add token refresh for enhanced security
 
 ### API Key Protection
 
