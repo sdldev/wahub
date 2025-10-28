@@ -1,7 +1,7 @@
 name: CI Pipeline (Monorepo)
 on:
   push:
-    branches: [main]
+    branches: [main, develope]
   pull_request:
     branches: ['*']
 
