@@ -10,11 +10,11 @@ async function seedDatabase() {
     initializeDatabase();
 
     // Wait a bit for database to be ready
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Check if admin user already exists
     const existingAdmin = await UserService.findByEmail('admin@wahub.local');
-    
+
     if (!existingAdmin) {
       // Create default admin user
       const adminUser = await UserService.createUser(
@@ -30,7 +30,7 @@ async function seedDatabase() {
         id: adminUser.id,
         email: adminUser.email,
         role: adminUser.role,
-        apiKey: adminUser.apiKey
+        apiKey: adminUser.apiKey,
       });
     } else {
       // Update existing admin user with correct password and new fields
@@ -38,13 +38,13 @@ async function seedDatabase() {
         password: 'Admin123456',
         phone: '628123456789',
         status: 'Active',
-        note: 'Default system administrator'
+        note: 'Default system administrator',
       });
-      
+
       logger.info('Admin user updated with new fields', {
         email: existingAdmin.email,
         role: existingAdmin.role,
-        status: 'Active'
+        status: 'Active',
       });
     }
 

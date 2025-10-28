@@ -85,9 +85,10 @@ export default function SessionsPage() {
       } else {
         setMessage(`❌ Failed to destroy session`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error destroying session:', error);
-      setMessage(`❌ ${error.response?.data?.error || 'Failed to destroy session'}`);
+      const axiosError = error as { response?: { data?: { error?: string } } };
+      setMessage(`❌ ${axiosError.response?.data?.error || 'Failed to destroy session'}`);
     } finally {
       setDestroyLoading(null);
     }
@@ -113,9 +114,10 @@ export default function SessionsPage() {
       } else {
         setMessage('Failed to create session');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating session:', error);
-      setMessage(error.response?.data?.message || 'Failed to create session');
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setMessage(axiosError.response?.data?.message || 'Failed to create session');
     }
   };
 

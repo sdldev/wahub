@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Smartphone, 
-  Wifi, 
-  WifiOff, 
-  RefreshCw, 
-  CheckCircle, 
+import {
+  Smartphone,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  CheckCircle,
   AlertCircle,
-  Loader2 
+  Loader2,
 } from 'lucide-react';
-
 
 interface SessionStatus {
   connected: boolean;
@@ -27,17 +26,17 @@ interface SessionCheckProps {
 export function SessionCheck({ onSessionReady }: SessionCheckProps) {
   const [sessionStatus, setSessionStatus] = useState<SessionStatus>({
     connected: false,
-    status: 'checking'
+    status: 'checking',
   });
   const [isRetrying, setIsRetrying] = useState(false);
 
-  const checkSession = async () => {
+  const checkSession = useCallback(async () => {
     try {
       const response = await fetch('http://localhost:5001/api/session/user-status', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {
@@ -48,7 +47,7 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
             phoneNumber: data.data.phoneNumber,
             qrCode: data.data.qrCode,
             status: data.data.connected ? 'connected' : 'disconnected',
-            message: data.data.message
+            message: data.data.message,
           });
 
           if (data.data.connected) {
@@ -59,7 +58,7 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
           setSessionStatus({
             connected: false,
             status: 'error',
-            message: data.message || 'Failed to check session status'
+            message: data.message || 'Failed to check session status',
           });
         }
       } else {
@@ -70,22 +69,22 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
       setSessionStatus({
         connected: false,
         status: 'error',
-        message: 'Unable to check WhatsApp session status'
+        message: 'Unable to check WhatsApp session status',
       });
     }
-  };
+  }, [onSessionReady]);
 
   const initializeSession = async () => {
     setIsRetrying(true);
-    setSessionStatus(prev => ({ ...prev, status: 'connecting' }));
+    setSessionStatus((prev) => ({ ...prev, status: 'connecting' }));
 
     try {
       const response = await fetch('http://localhost:5001/api/session/user-initialize', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {
@@ -95,7 +94,7 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
             connected: false,
             qrCode: data.data.qrCode,
             status: 'disconnected',
-            message: 'Scan QR code with WhatsApp to connect'
+            message: 'Scan QR code with WhatsApp to connect',
           });
 
           // Start polling for connection status
@@ -115,7 +114,7 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
       setSessionStatus({
         connected: false,
         status: 'error',
-        message: 'Failed to initialize WhatsApp session'
+        message: 'Failed to initialize WhatsApp session',
       });
     } finally {
       setIsRetrying(false);
@@ -124,7 +123,7 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
 
   useEffect(() => {
     checkSession();
-  }, []);
+  }, [checkSession]);
 
   const getStatusIcon = () => {
     switch (sessionStatus.status) {
@@ -164,15 +163,11 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4">
-            {getStatusIcon()}
-          </div>
+          <div className="mx-auto mb-4">{getStatusIcon()}</div>
           <CardTitle>WhatsApp Connection Required</CardTitle>
-          <CardDescription>
-            {getStatusMessage()}
-          </CardDescription>
+          <CardDescription>{getStatusMessage()}</CardDescription>
         </CardHeader>
-        
+
         <CardContent className="space-y-6">
           {sessionStatus.status === 'connected' && (
             <div className="text-center">
@@ -180,9 +175,7 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
                 <CheckCircle className="h-5 w-5" />
                 <span className="font-medium">Connection Successful!</span>
               </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Redirecting to dashboard...
-              </p>
+              <p className="text-sm text-muted-foreground mt-2">Redirecting to dashboard...</p>
             </div>
           )}
 
@@ -190,14 +183,10 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
             <div className="space-y-4">
               <div className="flex justify-center">
                 <div className="p-4 bg-white border-2 border-gray-200 rounded-lg">
-                  <img 
-                    src={sessionStatus.qrCode} 
-                    alt="WhatsApp QR Code" 
-                    className="w-48 h-48"
-                  />
+                  <img src={sessionStatus.qrCode} alt="WhatsApp QR Code" className="w-48 h-48" />
                 </div>
               </div>
-              
+
               <div className="text-center space-y-2">
                 <h3 className="font-medium">How to connect:</h3>
                 <ol className="text-sm text-muted-foreground space-y-1 text-left max-w-sm mx-auto">
@@ -210,13 +199,10 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
             </div>
           )}
 
-          {(sessionStatus.status === 'error' || (sessionStatus.status === 'disconnected' && !sessionStatus.qrCode)) && (
+          {(sessionStatus.status === 'error' ||
+            (sessionStatus.status === 'disconnected' && !sessionStatus.qrCode)) && (
             <div className="text-center">
-              <Button 
-                onClick={initializeSession}
-                disabled={isRetrying}
-                className="w-full"
-              >
+              <Button onClick={initializeSession} disabled={isRetrying} className="w-full">
                 {isRetrying ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -234,11 +220,7 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
 
           {sessionStatus.status === 'checking' && (
             <div className="text-center">
-              <Button 
-                onClick={checkSession}
-                variant="outline"
-                className="w-full"
-              >
+              <Button onClick={checkSession} variant="outline" className="w-full">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh Status
               </Button>

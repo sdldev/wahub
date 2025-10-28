@@ -152,7 +152,7 @@ async function createMysqlTables(pool: mysql.Pool) {
     `ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20) UNIQUE;`,
     `ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'Pending';`,
     `ALTER TABLE users ADD COLUMN IF NOT EXISTS note TEXT;`,
-    
+
     // Add constraint check for status if not exists
     `ALTER TABLE users ADD CONSTRAINT chk_status CHECK (status IN ('Active', 'Pending', 'Disable'));`,
 

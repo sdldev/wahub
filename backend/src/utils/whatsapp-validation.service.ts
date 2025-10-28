@@ -35,15 +35,15 @@ export class WhatsAppValidationService {
     // Indonesia: 62, Malaysia: 60, Singapore: 65, etc.
     const validCountryCodePatterns = [
       /^62\d{8,13}$/, // Indonesia (62 + 8-13 digits)
-      /^60\d{8,10}$/,  // Malaysia (60 + 8-10 digits)
-      /^65\d{8}$/,     // Singapore (65 + 8 digits)
-      /^66\d{8,9}$/,   // Thailand (66 + 8-9 digits)
-      /^1\d{10}$/,     // US/Canada (1 + 10 digits)
-      /^44\d{10}$/,    // UK (44 + 10 digits)
-      /^91\d{10}$/,    // India (91 + 10 digits)
+      /^60\d{8,10}$/, // Malaysia (60 + 8-10 digits)
+      /^65\d{8}$/, // Singapore (65 + 8 digits)
+      /^66\d{8,9}$/, // Thailand (66 + 8-9 digits)
+      /^1\d{10}$/, // US/Canada (1 + 10 digits)
+      /^44\d{10}$/, // UK (44 + 10 digits)
+      /^91\d{10}$/, // India (91 + 10 digits)
     ];
 
-    const hasValidCountryCode = validCountryCodePatterns.some(pattern => 
+    const hasValidCountryCode = validCountryCodePatterns.some((pattern) =>
       pattern.test(cleanPhone)
     );
 
@@ -61,17 +61,17 @@ export class WhatsAppValidationService {
   static formatPhoneNumber(phone: string): string {
     // Remove all non-digit characters
     const cleanPhone = phone.replace(/\D/g, '');
-    
+
     // If starts with 0, assume Indonesian number and replace with 62
     if (cleanPhone.startsWith('0')) {
       return '62' + cleanPhone.substring(1);
     }
-    
+
     // If doesn't start with country code, assume Indonesian
     if (!cleanPhone.startsWith('62') && cleanPhone.length >= 8 && cleanPhone.length <= 13) {
       return '62' + cleanPhone;
     }
-    
+
     return cleanPhone;
   }
 
@@ -83,44 +83,44 @@ export class WhatsAppValidationService {
   static async isPhoneNumberActive(phone: string): Promise<{ active: boolean; message: string }> {
     try {
       const validation = this.validatePhoneNumber(phone);
-      
+
       if (!validation.valid) {
         return {
           active: false,
-          message: validation.errors.join(', ')
+          message: validation.errors.join(', '),
         };
       }
 
       // TODO: Implement actual WhatsApp number verification
       // For now, we'll just validate the format
       const formattedPhone = this.formatPhoneNumber(phone);
-      
+
       // Basic Indonesian mobile number patterns
       const indonesianMobilePatterns = [
-        /^62(8[1-9])\d{6,9}$/,  // Telkomsel, XL, Indosat, etc.
-        /^628(1[0-9]|2[0-9]|3[0-9]|5[0-9]|7[0-9]|9[0-9])\d{6,8}$/
+        /^62(8[1-9])\d{6,9}$/, // Telkomsel, XL, Indosat, etc.
+        /^628(1[0-9]|2[0-9]|3[0-9]|5[0-9]|7[0-9]|9[0-9])\d{6,8}$/,
       ];
 
-      const isIndonesianMobile = indonesianMobilePatterns.some(pattern => 
+      const isIndonesianMobile = indonesianMobilePatterns.some((pattern) =>
         pattern.test(formattedPhone)
       );
 
       if (formattedPhone.startsWith('62') && !isIndonesianMobile) {
         return {
           active: false,
-          message: 'Indonesian phone number format is not recognized as mobile number'
+          message: 'Indonesian phone number format is not recognized as mobile number',
         };
       }
 
       return {
         active: true,
-        message: 'Phone number format is valid'
+        message: 'Phone number format is valid',
       };
     } catch (error: any) {
       logger.error('Phone validation error', { phone, error: error.message });
       return {
         active: false,
-        message: 'Error validating phone number'
+        message: 'Error validating phone number',
       };
     }
   }
