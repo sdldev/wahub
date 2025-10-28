@@ -39,11 +39,19 @@ export interface Message {
 
 export interface QueueStatus {
   session: string;
-  pending: number;
-  processing: number;
-  completed: number;
-  failed: number;
-  isProcessing: boolean;
+  stats: {
+    pending: number;
+    processing: number;
+    completed: number;
+    failed: number;
+  };
+  queue: Array<{
+    messageId: string;
+    to: string;
+    type: string;
+    status: string;
+    createdAt: string;
+  }>;
 }
 
 export const messageService = {

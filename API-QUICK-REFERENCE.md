@@ -149,7 +149,8 @@ await messageService.sendSticker({
 ### Get Queue Status
 ```typescript
 const status = await messageService.getQueueStatus('62812345678');
-// Returns: QueueStatus object
+// Returns: { session: string, stats: {...}, queue: [...] }
+// Note: Backend returns data directly, not wrapped in { data: ... }
 ```
 
 ## User Service

@@ -9,15 +9,20 @@ This guide helps developers migrate from old service implementations to the new,
 
 #### ❌ Old (Removed)
 ```typescript
-// This method no longer exists
+// This method no longer exists (never had a backend endpoint)
+// It was a mistake in the original implementation
 await sessionService.getQRCode(sessionId);
 ```
 
 #### ✅ New (Use this instead)
 ```typescript
-// Get QR code as image blob
+// Get QR code as image blob (PNG format)
+// Note: This returns a Blob, not a string!
 const blob = await sessionService.getQRCodeImage(sessionId);
 const imageUrl = URL.createObjectURL(blob);
+
+// Use imageUrl in an <img> tag
+<img src={imageUrl} alt="QR Code" />
 ```
 
 #### ⚠️ Updated Method Signatures
@@ -83,11 +88,12 @@ interface SendDocumentMessageRequest {
 }
 ```
 
-#### ❌ Removed Methods
+#### ❌ Removed Methods (Never Existed in Backend)
 ```typescript
-// These methods have been removed (backend endpoints don't exist)
-await messageService.clearQueue(session);
-await messageService.getMessageHistory(session);
+// These methods were in the service but backend endpoints don't exist
+// They should not have been there in the first place
+await messageService.clearQueue(session);           // No backend endpoint
+await messageService.getMessageHistory(session);    // No backend endpoint
 ```
 
 #### ✅ Added Method
