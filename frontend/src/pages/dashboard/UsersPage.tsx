@@ -48,21 +48,6 @@ export default function UsersPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user: currentUser } = useAuth();
 
-  // Check if current user is admin
-  if (!currentUser || currentUser.role !== 'admin') {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <Shield className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Access Denied</h3>
-          <p className="text-gray-600">You don't have permission to access user management.</p>
-          <p className="text-sm text-gray-500 mt-2">Only administrators can manage users.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Fetch users from API
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
@@ -120,7 +105,7 @@ export default function UsersPage() {
       // Prepare update data - exclude empty password
       const updateData: Partial<UserFormData> = { ...formData };
       if (!updateData.password) {
-        delete (updateData as any).password;
+        delete updateData.password;
       }
       
       const result = await userService.updateUser(selectedUser.id, updateData);
@@ -211,6 +196,20 @@ export default function UsersPage() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  // Check if current user is admin
+  if (!currentUser || currentUser.role !== 'admin') {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Shield className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Access Denied</h3>
+          <p className="text-gray-600">You don't have permission to access user management.</p>
+          <p className="text-sm text-gray-500 mt-2">Only administrators can manage users.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

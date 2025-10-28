@@ -72,21 +72,26 @@ export default function DashboardPage() {
             setSessionStatus(qrResponse.data.message || 'Failed to generate QR code');
             setQrCode(null);
           }
-        } catch (initError: any) {
+        } catch (initError: unknown) {
           console.error('Session initialization error:', initError);
           
           // Handle specific error cases
-          if (initError.response?.data?.error?.includes('already exists')) {
-            setSessionStatus('⚠️ WhatsApp session already exists. Please disconnect first or check connection status.');
-          } else if (initError.response?.data?.error) {
-            setSessionStatus(`❌ ${initError.response.data.error}`);
+          if (initError && typeof initError === 'object' && 'response' in initError) {
+            const axiosError = initError as { response?: { data?: { error?: string } } };
+            if (axiosError.response?.data?.error?.includes('already exists')) {
+              setSessionStatus('⚠️ WhatsApp session already exists. Please disconnect first or check connection status.');
+            } else if (axiosError.response?.data?.error) {
+              setSessionStatus(`❌ ${axiosError.response.data.error}`);
+            } else {
+              setSessionStatus('❌ Failed to generate QR code. Please try again.');
+            }
           } else {
             setSessionStatus('❌ Failed to generate QR code. Please try again.');
           }
           setQrCode(null);
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error checking session status:', error);
       setSessionStatus('❌ Failed to check WhatsApp connection status');
       setQrCode(null);

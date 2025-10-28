@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -31,7 +31,7 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
   });
   const [isRetrying, setIsRetrying] = useState(false);
 
-  const checkSession = async () => {
+  const checkSession = useCallback(async () => {
     try {
       const response = await fetch('http://localhost:5001/api/session/user-status', {
         headers: {
@@ -73,7 +73,7 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
         message: 'Unable to check WhatsApp session status'
       });
     }
-  };
+  }, [onSessionReady]);
 
   const initializeSession = async () => {
     setIsRetrying(true);
@@ -124,7 +124,7 @@ export function SessionCheck({ onSessionReady }: SessionCheckProps) {
 
   useEffect(() => {
     checkSession();
-  }, []);
+  }, [checkSession]);
 
   const getStatusIcon = () => {
     switch (sessionStatus.status) {

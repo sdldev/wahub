@@ -38,7 +38,7 @@ export default function MessagesPage() {
       if (response.success) {
         setConnectionStatus(response.data);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to check connection status:', error);
       setConnectionStatus({
         connected: false,
@@ -75,9 +75,10 @@ export default function MessagesPage() {
         setStatusMessage('❌ Failed to generate QR code. Please try again.');
         setShowQRModal(false);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error generating QR:', error);
-      setStatusMessage(`❌ ${error.response?.data?.message || 'Failed to generate QR code'}`);
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setStatusMessage(`❌ ${axiosError.response?.data?.message || 'Failed to generate QR code'}`);
       setShowQRModal(false);
     } finally {
       setIsGeneratingQR(false);
@@ -111,9 +112,10 @@ export default function MessagesPage() {
       } else {
         setStatusMessage('❌ Failed to send message. Please try again.');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending message:', error);
-      setStatusMessage(`❌ ${error.response?.data?.message || 'Failed to send message'}`);
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setStatusMessage(`❌ ${axiosError.response?.data?.message || 'Failed to send message'}`);
     } finally {
       setIsSending(false);
     }

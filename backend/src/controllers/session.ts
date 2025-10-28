@@ -44,8 +44,8 @@ export const createSessionController = () => {
       });
     }
 
-    const qr = await new Promise<string | null>(async (r) => {
-      await whatsapp.startSession(payload.session, {
+    const qr = await new Promise<string | null>((r) => {
+      whatsapp.startSession(payload.session, {
         onConnected() {
           r(null);
         },
@@ -89,8 +89,8 @@ export const createSessionController = () => {
       });
     }
 
-    const qr = await new Promise<string | null>(async (r) => {
-      await whatsapp.startSession(payload.session, {
+    const qr = await new Promise<string | null>((r) => {
+      whatsapp.startSession(payload.session, {
         onConnected() {
           r(null);
         },
@@ -125,8 +125,8 @@ export const createSessionController = () => {
       });
     }
 
-    const qr = await new Promise<string | null>(async (r) => {
-      await whatsapp.startSession(payload.session, {
+    const qr = await new Promise<string | null>((r) => {
+      whatsapp.startSession(payload.session, {
         onConnected() {
           r(null);
         },
@@ -186,8 +186,8 @@ export const createSessionController = () => {
       });
     }
 
-    const qr = await new Promise<string | null>(async (r) => {
-      await whatsapp.startSession(payload.session, {
+    const qr = await new Promise<string | null>((r) => {
+      whatsapp.startSession(payload.session, {
         onConnected() {
           r(null);
         },
@@ -395,8 +395,8 @@ export const createSessionController = () => {
       }
 
       // Start new WhatsApp session with phone number as session ID
-      const qr = await new Promise<string | null>(async (resolve) => {
-        await whatsapp.startSession(sessionId, {
+      const qr = await new Promise<string | null>((resolve) => {
+        whatsapp.startSession(sessionId, {
           onConnected: async () => {
             // Session connected, save to database
             try {

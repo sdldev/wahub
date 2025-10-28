@@ -157,7 +157,7 @@ class UserService {
   }
 
   async toggleUserStatus(id: number, isActive: boolean): Promise<{ success: boolean; data?: User; message?: string }> {
-    return this.updateUser(id, { isActive } as any);
+    return this.updateUser(id, { isActive } as Partial<User>);
   }
 
   async changeUserRole(id: number, role: 'admin' | 'user' | 'readonly'): Promise<{ success: boolean; data?: User; message?: string }> {
@@ -168,7 +168,7 @@ class UserService {
     return this.updateUser(id, { status });
   }
 
-  async requestAccess(accessData: { email: string; phone: string; note?: string }): Promise<{ success: boolean; message?: string; data?: any }> {
+  async requestAccess(accessData: { email: string; phone: string; note?: string }): Promise<{ success: boolean; message?: string; data?: { id?: number; email?: string } }> {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register-access`, {
         method: 'POST',

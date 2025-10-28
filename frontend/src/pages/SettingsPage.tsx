@@ -22,23 +22,6 @@ export default function SettingsPage() {
   const [destroyLoading, setDestroyLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<string>('');
 
-  // Only allow admin to access this page
-  if (user?.role !== 'admin') {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-red-600 mb-2">Access Denied</h3>
-              <p className="text-gray-600">Admin role required to access settings.</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const loadUserSessions = async () => {
     setIsLoading(true);
     setMessage('');
@@ -79,9 +62,10 @@ export default function SettingsPage() {
       } else {
         setMessage(`❌ Failed to destroy session`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error destroying session:', error);
-      setMessage(`❌ ${error.response?.data?.error || 'Failed to destroy session'}`);
+      const axiosError = error as { response?: { data?: { error?: string } } };
+      setMessage(`❌ ${axiosError.response?.data?.error || 'Failed to destroy session'}`);
     } finally {
       setDestroyLoading(null);
     }
@@ -104,6 +88,23 @@ export default function SettingsPage() {
     if (status === 'disconnected') return '🔴';
     return '⚪';
   };
+
+  // Only allow admin to access this page
+  if (user?.role !== 'admin') {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-red-600 mb-2">Access Denied</h3>
+              <p className="text-gray-600">Admin role required to access settings.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
