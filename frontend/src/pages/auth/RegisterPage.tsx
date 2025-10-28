@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -13,6 +15,17 @@ export default function RegisterPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,14 +38,33 @@ export default function RegisterPage() {
 
     setIsLoading(true);
 
-    // TODO: Implement actual registration logic with backend API
-    console.log('Register attempt:', formData);
+    try {
+      const response = await fetch('http://localhost:5001/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          role: 'user',
+        }),
+      });
 
-    // Simulate API call
-    setTimeout(() => {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Registration successful, redirect to login
+        navigate('/login', { state: { message: 'Registration successful! Please login.' } });
+      } else {
+        setError(data.message || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError('Network error. Please try again.');
+    } finally {
       setIsLoading(false);
-      // Redirect to login or dashboard on success
-    }, 1000);
+    }
   };
 
   const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,9 +134,9 @@ export default function RegisterPage() {
             </Button>
             <div className="text-center text-sm">
               <span className="text-muted-foreground">Already have an account? </span>
-              <a href="/login" className="text-primary hover:underline">
+              <Link to="/login" className="text-primary hover:underline">
                 Sign in
-              </a>
+              </Link>
             </div>
           </form>
         </CardContent>
