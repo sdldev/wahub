@@ -78,6 +78,7 @@ export const sessionService = {
       connected: boolean;
       phoneNumber?: string;
       sessionId?: string;
+      status?: 'connected' | 'disconnected' | 'connecting' | 'error';
       message: string;
     };
   }> => {
