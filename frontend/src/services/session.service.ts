@@ -29,19 +29,16 @@ export const sessionService = {
 
   // Create a new session
   createSession: async (data: CreateSessionRequest): Promise<QRCodeResponse> => {
-    const response = await api.post('/session/create', data);
-    return response.data;
-  },
-
-  // Get QR code for a session
-  getQRCode: async (sessionId: string): Promise<QRCodeResponse> => {
-    const response = await api.get(`/session/qr/${sessionId}`);
+    const response = await api.post('/session/start', {
+      session: data.sessionId,
+      phoneNumber: data.phoneNumber,
+    });
     return response.data;
   },
 
   // Get QR code as image
   getQRCodeImage: async (sessionId: string): Promise<Blob> => {
-    const response = await api.get(`/session/qr-image/${sessionId}`, {
+    const response = await api.get(`/session/qr-image?session=${sessionId}`, {
       responseType: 'blob',
     });
     return response.data;
@@ -55,7 +52,7 @@ export const sessionService = {
 
   // Logout/disconnect a session
   logoutSession: async (sessionId: string): Promise<void> => {
-    await api.post('/session/logout', { sessionId });
+    await api.post('/session/logout', { session: sessionId });
   },
 
   // Check if phone number has active session
@@ -70,7 +67,7 @@ export const sessionService = {
   cleanupSessions: async (
     hours: number = 24
   ): Promise<{ message: string; cleanedCount: number }> => {
-    const response = await api.post('/session/cleanup', { hours });
+    const response = await api.post(`/session/cleanup?hours=${hours}`);
     return response.data.data;
   },
 };
