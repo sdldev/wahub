@@ -72,8 +72,8 @@ authController.post('/register', zValidator('json', registerSchema), async (c) =
 
     // Create user with new fields
     const user = await UserService.createUser(
-      email, 
-      password, 
+      email,
+      password,
       role || 'user',
       phone,
       status || 'Pending',
@@ -258,11 +258,11 @@ authController.post('/register-access', zValidator('json', publicRegisterSchema)
 
     // Generate temporary password for admin to change later
     const tempPassword = 'TempPass123!';
-    
+
     // Create user with pending status
     const user = await UserService.createUser(
-      email, 
-      tempPassword, 
+      email,
+      tempPassword,
       'user',
       phone,
       'Pending',

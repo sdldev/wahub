@@ -331,13 +331,13 @@ export const createSessionController = () => {
     try {
       // Get user from JWT middleware context (set by createJwtMiddleware)
       const user = (c as any).get('user');
-      
+
       // Check WhatsApp session for all users (including admin) based on phone number
       if (user && user.phone) {
         // Use phone number as session ID
         const sessionId = user.phone;
         const waSession = whatsapp.getSession(sessionId);
-        
+
         if (waSession) {
           return c.json({
             success: true,
@@ -345,8 +345,8 @@ export const createSessionController = () => {
               connected: true,
               phoneNumber: user.phone,
               sessionId: sessionId,
-              message: `Connected as ${user.phone}`
-            }
+              message: `Connected as ${user.phone}`,
+            },
           });
         }
       }
@@ -356,17 +356,20 @@ export const createSessionController = () => {
         success: true,
         data: {
           connected: false,
-          message: user?.phone 
+          message: user?.phone
             ? `No WhatsApp session found for ${user.phone}. Please connect your WhatsApp.`
-            : 'Phone number required. Please update your profile with a valid phone number.'
-        }
+            : 'Phone number required. Please update your profile with a valid phone number.',
+        },
       });
     } catch (error: any) {
       console.error('Failed to get user session status:', error);
-      return c.json({
-        success: false,
-        error: 'Failed to check session status'
-      }, 500);
+      return c.json(
+        {
+          success: false,
+          error: 'Failed to check session status',
+        },
+        500
+      );
     }
   });
 
@@ -374,24 +377,30 @@ export const createSessionController = () => {
     try {
       // Get user from JWT middleware context
       const user = (c as any).get('user');
-      
+
       if (!user || !user.phone) {
-        return c.json({
-          success: false,
-          error: 'User phone number is required to create WhatsApp session'
-        }, 400);
+        return c.json(
+          {
+            success: false,
+            error: 'User phone number is required to create WhatsApp session',
+          },
+          400
+        );
       }
 
       // Use phone number as session ID (unique per user)
       const sessionId = user.phone;
-      
+
       // Check if session already exists
       const isExist = whatsapp.getSession(sessionId);
       if (isExist) {
-        return c.json({
-          success: false,
-          error: 'WhatsApp session already exists for this phone number'
-        }, 400);
+        return c.json(
+          {
+            success: false,
+            error: 'WhatsApp session already exists for this phone number',
+          },
+          400
+        );
       }
 
       // Start new WhatsApp session with phone number as session ID
@@ -402,11 +411,7 @@ export const createSessionController = () => {
             try {
               const waSession = whatsapp.getSession(sessionId);
               if (waSession) {
-                await WhatsappAccountService.createAccount(
-                  user.id,
-                  sessionId,
-                  user.phone
-                );
+                await WhatsappAccountService.createAccount(user.id, sessionId, user.phone);
               }
             } catch (dbError) {
               console.error('Failed to save session to database:', dbError);
@@ -435,15 +440,18 @@ export const createSessionController = () => {
               sessionId,
               phoneNumber: user.phone,
               message: `QR code generated for ${user.phone}. Please scan with WhatsApp to connect.`,
-              expiresIn: 120
-            }
+              expiresIn: 120,
+            },
           });
         } catch (qrError) {
           console.error('Failed to generate QR data URL:', qrError);
-          return c.json({
-            success: false,
-            error: 'Failed to generate QR code'
-          }, 500);
+          return c.json(
+            {
+              success: false,
+              error: 'Failed to generate QR code',
+            },
+            500
+          );
         }
       }
 
@@ -453,15 +461,18 @@ export const createSessionController = () => {
           connected: true,
           sessionId,
           phoneNumber: user.phone,
-          message: `WhatsApp connected successfully for ${user.phone}`
-        }
+          message: `WhatsApp connected successfully for ${user.phone}`,
+        },
       });
     } catch (error: any) {
       console.error('Failed to initialize user session:', error);
-      return c.json({
-        success: false,
-        error: 'Failed to initialize WhatsApp session'
-      }, 500);
+      return c.json(
+        {
+          success: false,
+          error: 'Failed to initialize WhatsApp session',
+        },
+        500
+      );
     }
   });
 
@@ -489,16 +500,19 @@ export const createSessionController = () => {
   app.post('/destroy-user-session', requestValidator('json', destroySessionSchema), async (c) => {
     try {
       const payload = c.req.valid('json');
-      
+
       // Get user from JWT middleware context (should be admin)
       const currentUser = (c as any).get('user');
-      
+
       // Only allow admin to destroy other users' sessions
       if (currentUser?.role !== 'admin') {
-        return c.json({
-          success: false,
-          error: 'Access denied. Admin role required.'
-        }, 403);
+        return c.json(
+          {
+            success: false,
+            error: 'Access denied. Admin role required.',
+          },
+          403
+        );
       }
 
       let sessionId = payload.sessionId;
@@ -516,15 +530,18 @@ export const createSessionController = () => {
       }
 
       if (!sessionId) {
-        return c.json({
-          success: false,
-          error: 'Session ID or phone number is required'
-        }, 400);
+        return c.json(
+          {
+            success: false,
+            error: 'Session ID or phone number is required',
+          },
+          400
+        );
       }
 
       // Check if session exists in WhatsApp
       const waSession = whatsapp.getSession(sessionId);
-      
+
       // Destroy WhatsApp session if exists
       if (waSession) {
         await whatsapp.deleteSession(sessionId);
@@ -538,15 +555,18 @@ export const createSessionController = () => {
         data: {
           message: `Session ${sessionId} has been destroyed successfully`,
           sessionId,
-          phoneNumber: phoneNumber || sessionId
-        }
+          phoneNumber: phoneNumber || sessionId,
+        },
       });
     } catch (error: any) {
       console.error('Failed to destroy session:', error);
-      return c.json({
-        success: false,
-        error: 'Failed to destroy session'
-      }, 500);
+      return c.json(
+        {
+          success: false,
+          error: 'Failed to destroy session',
+        },
+        500
+      );
     }
   });
 
@@ -555,31 +575,34 @@ export const createSessionController = () => {
     try {
       // Get user from JWT middleware context (should be admin)
       const currentUser = (c as any).get('user');
-      
+
       if (currentUser?.role !== 'admin') {
-        return c.json({
-          success: false,
-          error: 'Access denied. Admin role required.'
-        }, 403);
+        return c.json(
+          {
+            success: false,
+            error: 'Access denied. Admin role required.',
+          },
+          403
+        );
       }
 
       // Import UserService
       const { UserService } = await import('../db/services/user.service');
-      
+
       // Get all users from database
       const allUsers = await UserService.listUsers();
-      
+
       // Get all WhatsApp accounts from database
       const accounts = await WhatsappAccountService.listAllAccounts();
-      
+
       // Get current sessions from WhatsApp
       const activeSessions = whatsapp.getAllSession();
 
       // Map users with their session information
       const usersWithSessions = allUsers.map((user) => {
         // Find account for this user
-        const account = accounts.find(acc => acc.userId === user.id);
-        
+        const account = accounts.find((acc) => acc.userId === user.id);
+
         return {
           userId: user.id,
           email: user.email,
@@ -594,14 +617,17 @@ export const createSessionController = () => {
 
       return c.json({
         success: true,
-        data: usersWithSessions
+        data: usersWithSessions,
       });
     } catch (error: any) {
       console.error('Failed to get users:', error);
-      return c.json({
-        success: false,
-        error: 'Failed to get users'
-      }, 500);
+      return c.json(
+        {
+          success: false,
+          error: 'Failed to get users',
+        },
+        500
+      );
     }
   });
 
