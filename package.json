@@ -1,0 +1,60 @@
+{
+  "name": "wahub-monorepo",
+  "version": "1.0.0",
+  "description": "WhatsApp Hub - Full Stack Application Monorepo",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "cd backend && bun run dev",
+    "dev:frontend": "cd frontend && bun run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && bun run build",
+    "build:frontend": "cd frontend && bun run build",
+    "start": "concurrently \"npm:start:backend\" \"npm:start:frontend\"",
+    "start:backend": "cd backend && bun run start",
+    "start:frontend": "cd frontend && bun run preview",
+    "install:all": "cd backend && bun install && cd ../frontend && bun install",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && bun test",
+    "test:frontend": "cd frontend && bun run test",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && bun run lint",
+    "lint:frontend": "cd frontend && bun run lint",
+    "format": "npm run format:backend && npm run format:frontend",
+    "format:backend": "cd backend && bun run format:fix",
+    "format:frontend": "cd frontend && bun run format:fix",
+    "clean": "rm -rf backend/node_modules backend/dist frontend/node_modules frontend/dist",
+    "db:studio": "cd backend && bun run db:studio",
+    "db:migrate": "cd backend && bun run db:migrate",
+    "docs": "echo '📚 API Documentation: http://localhost:5001/api-docs/ui' && echo '🌐 Frontend App: http://localhost:5173' && npm run dev"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": {
+    "name": "santrimu",
+    "email": "satrimuhub@gmail.com"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:sdldev/wahub.git"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "keywords": [
+    "whatsapp",
+    "api",
+    "chatbot",
+    "monorepo",
+    "typescript",
+    "bun",
+    "react",
+    "hono"
+  ]
+}
