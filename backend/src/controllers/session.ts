@@ -502,7 +502,7 @@ export const createSessionController = () => {
       }
 
       let sessionId = payload.sessionId;
-      let phoneNumber = payload.phoneNumber;
+      const phoneNumber = payload.phoneNumber;
 
       // If userId provided, get user's phone number
       if (payload.userId) {
