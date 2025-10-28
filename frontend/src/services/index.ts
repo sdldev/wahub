@@ -7,11 +7,7 @@ export { profileService } from './profile.service';
 
 // Export types
 export type { LoginRequest, RegisterRequest, AuthResponse } from './auth.service';
-export type {
-  Session,
-  CreateSessionRequest,
-  QRCodeResponse,
-} from './session.service';
+export type { Session, CreateSessionRequest, QRCodeResponse } from './session.service';
 export type {
   SendTextMessageRequest,
   SendImageMessageRequest,
@@ -19,12 +15,5 @@ export type {
   Message,
   QueueStatus,
 } from './message.service';
-export type {
-  User,
-  UpdateUserRequest,
-  WhatsAppAccount,
-} from './user.service';
-export type {
-  WhatsAppProfile,
-  GetProfileRequest,
-} from './profile.service';
+export type { User, UpdateUserRequest, WhatsAppAccount } from './user.service';
+export type { WhatsAppProfile, GetProfileRequest } from './profile.service';
