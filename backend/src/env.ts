@@ -69,6 +69,10 @@ export const env = z
   )
   .refine(
     (data) => {
+      // Skip database validation in test environment
+      if (data.NODE_ENV === 'test') {
+        return true;
+      }
       if (data.DB_TYPE === 'mysql') {
         if (!data.DB_HOST || !data.DB_USER || !data.DB_PASSWORD) {
           return false;
