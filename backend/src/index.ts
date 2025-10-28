@@ -22,6 +22,7 @@ import { createJwtMiddleware } from './middlewares/jwt.middleware';
 import { initializeDatabase } from './db';
 import { logger as winstonLogger } from './utils/logger';
 import { SessionManagementService } from './services/session-management.service';
+import { createSimpleApiDocs } from './docs/simple-docs';
 
 // Initialize database
 try {
@@ -83,6 +84,11 @@ app.route('/message', createMessageController());
  * profile routes
  */
 app.route('/profile', createProfileController());
+
+/**
+ * API Documentation
+ */
+app.route('/api-docs', createSimpleApiDocs());
 
 /**
  * Health check endpoint for Docker

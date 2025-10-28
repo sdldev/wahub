@@ -35,14 +35,18 @@ export class UserService {
           password: hashedPassword,
           role,
           apiKey,
-        })
-        .returning();
+        });
 
-      if (!result || result.length === 0) {
+      if (!result || !result.insertId) {
         throw new Error('Failed to create user');
       }
 
-      const user = result[0];
+      // Get the created user
+      const user = await this.findById(Number(result.insertId));
+      if (!user) {
+        throw new Error('User created but could not retrieve');
+      }
+
       dbLogger.info(`User created: ${email}`, { userId: user.id });
       return user;
     } catch (error: any) {
@@ -159,16 +163,20 @@ export class UserService {
         .update(users)
         .set({
           ...data,
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date(),
         })
-        .where(eq(users.id, id))
-        .returning();
+        .where(eq(users.id, id));
 
-      if (!result || result.length === 0) {
-        throw new Error('User not found');
+      if (!result || result.affectedRows === 0) {
+        throw new Error('User not found');  
       }
 
-      const user = result[0];
+      // Get the updated user
+      const user = await this.findById(id);
+      if (!user) {
+        throw new Error('User updated but could not retrieve');
+      }
+
       dbLogger.info(`User updated: ${id}`);
       return user;
     } catch (error: any) {
@@ -180,14 +188,22 @@ export class UserService {
   /**
    * Delete user
    */
-  static async deleteUser(id: number): Promise<void> {
-    try {
-      await db.delete(users).where(eq(users.id, id));
-      dbLogger.info(`User deleted: ${id}`);
-    } catch (error: any) {
-      dbLogger.error('Failed to delete user', { id, error: error.message });
-      throw error;
+  static async deleteUser(id: number): Promise<{ success: boolean }> {
+    dbLogger.info(`Deleting user: ${id}`);
+    
+    const existingUser = await this.findById(id);
+    if (!existingUser) {
+      throw new Error('User not found');
     }
+
+    const result = await db.delete(users).where(eq(users.id, id));
+    
+    if (!result || result.affectedRows === 0) {
+      throw new Error('Failed to delete user');
+    }
+    
+    dbLogger.info(`User deleted: ${id}`);
+    return { success: true };
   }
 
   /**
