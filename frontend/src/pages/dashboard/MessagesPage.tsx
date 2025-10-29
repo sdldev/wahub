@@ -12,6 +12,7 @@ interface ConnectionStatus {
   connected: boolean;
   phoneNumber?: string;
   sessionId?: string;
+  status?: 'connected' | 'disconnected' | 'connecting' | 'error';
   message: string;
 }
 
@@ -59,18 +60,36 @@ export default function MessagesPage() {
         setQrCode(response.data.qrCode);
         
         // Auto refresh connection status after successful connection
+        // Only close modal when status is actually "connected"
         const checkInterval = setInterval(async () => {
           const statusResponse = await sessionService.getUserStatus();
-          if (statusResponse.success && statusResponse.data.connected) {
-            setConnectionStatus(statusResponse.data);
-            setShowQRModal(false);
-            setStatusMessage('✅ WhatsApp connected successfully!');
-            clearInterval(checkInterval);
+          if (statusResponse.success) {
+            const status = statusResponse.data.status || 'disconnected';
+            
+            // Only close modal and show success when truly connected
+            if (status === 'connected' && statusResponse.data.connected) {
+              setConnectionStatus(statusResponse.data);
+              setShowQRModal(false);
+              setStatusMessage('✅ WhatsApp connected successfully!');
+              clearInterval(checkInterval);
+            }
+            // Update connection status but keep modal open if still connecting
+            else if (status === 'connecting') {
+              setConnectionStatus({
+                ...statusResponse.data,
+                connected: false,
+                status: 'connecting'
+              });
+            }
           }
         }, 3000);
 
         // Clear interval after 2 minutes (QR code expires)
-        setTimeout(() => clearInterval(checkInterval), 120000);
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          // If still showing modal after 2 minutes, show timeout message
+          setStatusMessage('⏱️ QR code expired. Please try again.');
+        }, 120000);
       } else {
         setStatusMessage('❌ Failed to generate QR code. Please try again.');
         setShowQRModal(false);
@@ -134,10 +153,15 @@ export default function MessagesPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {connectionStatus?.connected ? (
+            {connectionStatus?.status === 'connected' && connectionStatus?.connected ? (
               <>
                 <CheckCircle className="h-5 w-5 text-green-600" />
                 WhatsApp Connected
+              </>
+            ) : connectionStatus?.status === 'connecting' ? (
+              <>
+                <Clock className="h-5 w-5 text-yellow-600 animate-pulse" />
+                WhatsApp Connecting
               </>
             ) : (
               <>
@@ -152,9 +176,17 @@ export default function MessagesPage() {
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Status</span>
               <span className={`text-sm font-medium ${
-                connectionStatus?.connected ? 'text-green-600' : 'text-red-600'
+                connectionStatus?.status === 'connected' && connectionStatus?.connected
+                  ? 'text-green-600'
+                  : connectionStatus?.status === 'connecting'
+                  ? 'text-yellow-600'
+                  : 'text-red-600'
               }`}>
-                {connectionStatus?.connected ? 'Connected' : 'Disconnected'}
+                {connectionStatus?.status === 'connected' && connectionStatus?.connected
+                  ? 'Connected'
+                  : connectionStatus?.status === 'connecting'
+                  ? 'Connecting...'
+                  : 'Disconnected'}
               </span>
             </div>
             {connectionStatus?.phoneNumber && (
@@ -169,16 +201,21 @@ export default function MessagesPage() {
                 <Button variant="outline" size="sm" onClick={checkConnectionStatus}>
                   Refresh
                 </Button>
-                {!connectionStatus?.connected && (
+                {connectionStatus?.status !== 'connected' && !connectionStatus?.connected && (
                   <Button 
                     size="sm" 
                     onClick={handleScanQR}
-                    disabled={isGeneratingQR}
+                    disabled={isGeneratingQR || connectionStatus?.status === 'connecting'}
                   >
                     {isGeneratingQR ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Generating...
+                      </>
+                    ) : connectionStatus?.status === 'connecting' ? (
+                      <>
+                        <Clock className="mr-2 h-4 w-4 animate-pulse" />
+                        Connecting...
                       </>
                     ) : (
                       <>
@@ -362,7 +399,9 @@ export default function MessagesPage() {
           <DialogHeader>
             <DialogTitle>Connect WhatsApp</DialogTitle>
             <DialogDescription>
-              Scan this QR code with your WhatsApp mobile app to connect
+              {connectionStatus?.status === 'connecting' 
+                ? 'Scan this QR code with your WhatsApp mobile app to connect'
+                : 'Generating QR code...'}
             </DialogDescription>
           </DialogHeader>
           
@@ -377,6 +416,12 @@ export default function MessagesPage() {
                   />
                 </div>
                 <div className="text-center space-y-2">
+                  {connectionStatus?.status === 'connecting' ? (
+                    <div className="flex items-center justify-center gap-2 text-yellow-600">
+                      <Clock className="h-4 w-4 animate-pulse" />
+                      <p className="text-sm font-medium">Waiting for scan...</p>
+                    </div>
+                  ) : null}
                   <p className="text-sm font-medium">How to scan:</p>
                   <ol className="text-xs text-muted-foreground space-y-1">
                     <li>1. Open WhatsApp on your phone</li>
@@ -399,7 +444,9 @@ export default function MessagesPage() {
 
           <div className="flex justify-between items-center pt-4 border-t">
             <p className="text-xs text-muted-foreground">
-              Having trouble? Refresh and try again
+              {connectionStatus?.status === 'connecting' 
+                ? 'Scan QR code to connect'
+                : 'Having trouble? Refresh and try again'}
             </p>
             <Button 
               variant="outline" 

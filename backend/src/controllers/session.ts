@@ -336,16 +336,42 @@ export const createSessionController = () => {
       if (user && user.phone) {
         // Use phone number as session ID
         const sessionId = user.phone;
-        const waSession = whatsapp.getSession(sessionId);
 
-        if (waSession) {
+        // Check database for account record first
+        const account = await WhatsappAccountService.findBySessionId(sessionId);
+
+        if (account) {
+          // Account exists in database, return its actual status
           return c.json({
             success: true,
             data: {
-              connected: true,
+              connected: account.status === 'connected',
+              phoneNumber: account.phoneNumber || user.phone,
+              sessionId: sessionId,
+              status: account.status,
+              message:
+                account.status === 'connected'
+                  ? `Connected as ${account.phoneNumber || user.phone}`
+                  : account.status === 'connecting'
+                    ? 'Connecting to WhatsApp... Please scan the QR code.'
+                    : `Not connected. Please scan QR code to connect.`,
+            },
+          });
+        }
+
+        // No database record, check if there's a WhatsApp session (shouldn't happen)
+        const waSession = whatsapp.getSession(sessionId);
+        if (waSession) {
+          // Session exists but no DB record - this is an inconsistent state
+          // Treat as connecting
+          return c.json({
+            success: true,
+            data: {
+              connected: false,
               phoneNumber: user.phone,
               sessionId: sessionId,
-              message: `Connected as ${user.phone}`,
+              status: 'connecting',
+              message: 'Connecting to WhatsApp... Please scan the QR code.',
             },
           });
         }
@@ -356,6 +382,7 @@ export const createSessionController = () => {
         success: true,
         data: {
           connected: false,
+          status: 'disconnected',
           message: user?.phone
             ? `No WhatsApp session found for ${user.phone}. Please connect your WhatsApp.`
             : 'Phone number required. Please update your profile with a valid phone number.',
@@ -391,7 +418,7 @@ export const createSessionController = () => {
       // Use phone number as session ID (unique per user)
       const sessionId = user.phone;
 
-      // Check if session already exists
+      // Check if session already exists in WhatsApp
       const isExist = whatsapp.getSession(sessionId);
       if (isExist) {
         return c.json(
@@ -403,19 +430,24 @@ export const createSessionController = () => {
         );
       }
 
+      // Check if database record already exists
+      const existingAccount = await WhatsappAccountService.findBySessionId(sessionId);
+      if (existingAccount) {
+        // Update status to connecting and continue
+        await WhatsappAccountService.updateStatus(sessionId, 'connecting');
+      } else {
+        // Create database record immediately with "connecting" status
+        await WhatsappAccountService.createAccount(user.id, sessionId, user.phone);
+        // Update to connecting status
+        await WhatsappAccountService.updateStatus(sessionId, 'connecting');
+      }
+
       // Start new WhatsApp session with phone number as session ID
       const qr = await new Promise<string | null>((resolve) => {
         whatsapp.startSession(sessionId, {
           onConnected: async () => {
-            // Session connected, save to database
-            try {
-              const waSession = whatsapp.getSession(sessionId);
-              if (waSession) {
-                await WhatsappAccountService.createAccount(user.id, sessionId, user.phone);
-              }
-            } catch (dbError) {
-              console.error('Failed to save session to database:', dbError);
-            }
+            // Session connected - status will be updated by global event handler
+            // Just resolve to indicate connection completed
             resolve(null);
           },
           onQRUpdated: (qrCode) => {
