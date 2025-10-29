@@ -57,6 +57,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.ok) {
         const userData = await response.json();
         setUser(userData.data);
+
+        // Store API key for WhatsApp operations
+        if (userData.data.apiKey) {
+          localStorage.setItem('apiKey', userData.data.apiKey);
+        }
       } else {
         // Token is invalid, remove it
         localStorage.removeItem('token');
@@ -88,6 +93,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.ok && data.success) {
         // Store token
         localStorage.setItem('token', data.data.token);
+
+        // Store API key for WhatsApp operations
+        if (data.data.user.apiKey) {
+          localStorage.setItem('apiKey', data.data.user.apiKey);
+        }
 
         // Set user data
         setUser(data.data.user);

@@ -419,15 +419,33 @@ export const createSessionController = () => {
       const sessionId = user.phone;
 
       // Check if session already exists in WhatsApp
-      const isExist = whatsapp.getSession(sessionId);
-      if (isExist) {
-        return c.json(
-          {
-            success: false,
-            error: 'WhatsApp session already exists for this phone number',
-          },
-          400
-        );
+      const existingSession = whatsapp.getSession(sessionId);
+      if (existingSession && !!existingSession) {
+        // Check if session is actually connected by checking database status too
+        const existingAccount = await WhatsappAccountService.findBySessionId(sessionId);
+        if (existingAccount && existingAccount.status === 'connected') {
+          // Session already connected, return success
+          return c.json({
+            success: true,
+            data: {
+              connected: true,
+              sessionId,
+              phoneNumber: user.phone,
+              message: `WhatsApp already connected for ${user.phone}`,
+            },
+          });
+        }
+      }
+
+      // If session exists but not connected, delete it first to reset
+      if (existingSession) {
+        try {
+          whatsapp.deleteSession(sessionId);
+          console.log(`Deleted existing disconnected session: ${sessionId}`);
+        } catch (deleteError) {
+          console.warn(`Failed to delete existing session ${sessionId}:`, deleteError);
+          // Continue anyway, try to create new session
+        }
       }
 
       // Check if database record already exists
